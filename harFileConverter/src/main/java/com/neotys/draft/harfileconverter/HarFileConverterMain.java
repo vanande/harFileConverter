@@ -1,5 +1,6 @@
 package com.neotys.draft.harfileconverter;
 
+import com.google.common.net.MediaType;
 import com.neotys.neoload.model.v3.project.Project;
 import com.neotys.neoload.model.v3.project.server.Server;
 import com.neotys.neoload.model.v3.project.userpath.Container;
@@ -19,9 +20,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,7 @@ public class HarFileConverterMain {
 			streamHarEntries.forEach( currentHarEntry -> {
 
 				//Display all URLs found in HAR File: 
-				logger.info(currentHarEntry.getRequest().getUrl());
+				//logger.info(currentHarEntry.getRequest().getUrl());
 
 				try {
 					URL url = new URL(currentHarEntry.getRequest().getUrl());
@@ -69,10 +70,10 @@ public class HarFileConverterMain {
 					Server server = Server.builder()
 							.name(url.getHost())
 							.host(url.getHost())
-							.port(String.valueOf(url.getPort()))
+							.port(String.valueOf(url.getPort() != -1 ? url.getPort() : url.getDefaultPort()))
 							.scheme(Server.Scheme.valueOf(url.getProtocol().toUpperCase())) //valueof converts String to equivalent enum value ( HTTP / HTTPS )
 							.build();
-
+					
 					if(servers.indexOf(server)!=-1) {
 						server = servers.get(servers.indexOf(server));
 					} else {
@@ -97,12 +98,43 @@ public class HarFileConverterMain {
 							.addAllHeaders(streamHeaders::iterator)
 							.server(url.getHost());
 									
-					//Gestion des contenus POST :
-					if ( StringUtils.isNotEmpty(currentHarEntry.getRequest().getPostData().getText()) ) 
-					{	
-						requestBuilder.body(currentHarEntry.getRequest().getPostData().getText());
+					//POST data management : body / bodyBinary / parts 
+					//Get the current Content-Type :
+					Optional<String> currentContentType = currentHarEntry.getRequest().getHeaders().stream()
+					.filter(header -> "content-type".equalsIgnoreCase(header.getName()) && header.getValue() != null)
+					.map(header -> header.getValue())
+					.findFirst()
+					;
+					
+					//TODO : Il faut trouver du Multipart pour verifier le format HAR : currentHarEntry.getRequest().getPostData().getText() != null
+					if (currentContentType.isPresent()  && currentHarEntry.getRequest().getPostData().getText() != null) {
+						logger.info(currentHarEntry.getRequest().getUrl());
+						logger.info(currentContentType.toString());
+	 					MediaType mediaType = MediaType.parse(currentContentType.get());
+						
+	 					if(mediaType.is(MediaType.ANY_TEXT_TYPE)) {
+							logger.info("MediaType.ANY_TEXT_TYPE");
+							requestBuilder.body(currentHarEntry.getRequest().getPostData().getText());
+						}
+						else if("application".equalsIgnoreCase(mediaType.type())
+								&& mediaType.subtype().toLowerCase().contains("form-urlencoded")) { 								
+							logger.info("FORM_CONTENT");	
+							requestBuilder.body(currentHarEntry.getRequest().getPostData().getText());
+						}
+						else if("application".equalsIgnoreCase(mediaType.type())) {
+							logger.info("RAW_CONTENT");
+							//TODO : Add RAW content postData in bodyBinary object, import format String.getbytes() ?
+						}
+						else if("multipart".equalsIgnoreCase(mediaType.type())) {
+							logger.info("MULTIPART_CONTENT");
+							//TODO : Add multipart content postData in parts object, import format ? Need an har example...
+						}
+						else
+							logger.info("UNKNOWN FORMAT");
+
 					}
 					
+		
 					Request request = requestBuilder.build();
 					
 					actionsContainer.addSteps(request);
