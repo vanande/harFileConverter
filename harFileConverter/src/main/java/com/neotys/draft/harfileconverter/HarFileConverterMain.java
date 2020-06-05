@@ -21,6 +21,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -46,7 +48,7 @@ public class HarFileConverterMain {
 		int result = fileChooser.showOpenDialog(fileChooser);
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File harSelectedFile = fileChooser.getSelectedFile();
-			logger.info("Selected file: " + harSelectedFile.getAbsolutePath().toString());
+			logger.info(String.format("Selected file: %1$s" , harSelectedFile.getAbsolutePath().toString()));
 
 
 			Container.Builder actionsContainer = Container.builder().name("Actions");
@@ -60,9 +62,6 @@ public class HarFileConverterMain {
 			Stream<HarEntry> streamHarEntries = harFileListOfEntries.stream();
 
 			streamHarEntries.forEach( currentHarEntry -> {
-
-				//Display all URLs found in HAR File: 
-				//logger.info(currentHarEntry.getRequest().getUrl());
 
 				try {
 					URL url = new URL(currentHarEntry.getRequest().getUrl());
@@ -97,23 +96,24 @@ public class HarFileConverterMain {
 							.method(currentHarEntry.getRequest().getMethod().toString())
 							.addAllHeaders(streamHeaders::iterator)
 							.server(url.getHost());
-									
+					
+					
+					
 					//POST data management : body / bodyBinary / parts 
 					//Get the current Content-Type :
 					Optional<String> currentContentType = currentHarEntry.getRequest().getHeaders().stream()
 					.filter(header -> "content-type".equalsIgnoreCase(header.getName()) && header.getValue() != null)
-					.map(header -> header.getValue())
+					.map(HarHeader::getValue)
 					.findFirst()
 					;
 					
-					//TODO : Il faut trouver du Multipart pour verifier le format HAR : currentHarEntry.getRequest().getPostData().getText() != null
 					if (currentContentType.isPresent()  && currentHarEntry.getRequest().getPostData().getText() != null) {
 						logger.info(currentHarEntry.getRequest().getUrl());
 						logger.info(currentContentType.toString());
 	 					MediaType mediaType = MediaType.parse(currentContentType.get());
 						
 	 					if(mediaType.is(MediaType.ANY_TEXT_TYPE)) {
-							logger.info("MediaType.ANY_TEXT_TYPE");
+							logger.info("ANY_TEXT_TYPE");
 							requestBuilder.body(currentHarEntry.getRequest().getPostData().getText());
 						}
 						else if("application".equalsIgnoreCase(mediaType.type())
@@ -123,11 +123,26 @@ public class HarFileConverterMain {
 						}
 						else if("application".equalsIgnoreCase(mediaType.type())) {
 							logger.info("RAW_CONTENT");
-							//TODO : Add RAW content postData in bodyBinary object, import format String.getbytes() ?
+							requestBuilder.bodyBinary(currentHarEntry.getRequest().getPostData().getText().getBytes());
 						}
 						else if("multipart".equalsIgnoreCase(mediaType.type())) {
+							
+							
 							logger.info("MULTIPART_CONTENT");
-							//TODO : Add multipart content postData in parts object, import format ? Need an har example...
+							
+							//Get the boundary information in the Content-Type Header:
+							String boundary = ParameterExtractor.extract(currentContentType.get(), "boundary=");
+					        logger.info("Found boundary value: " + boundary);
+					        MultipartAnalyzer analyseMultipart = new MultipartAnalyzer(
+					            			currentHarEntry.getRequest().getPostData().getText(),
+					            			boundary);
+					            
+					        if ( !boundary.equals("") ) {
+					        	requestBuilder.parts(analyseMultipart.returnParts());
+					        }
+					        //TODO : gerer le cas ou on ne trouve pas boundary, que fait on ? deja traite dans class MultipartStream
+					        
+							
 						}
 						else
 							logger.info("UNKNOWN FORMAT");
@@ -139,7 +154,7 @@ public class HarFileConverterMain {
 					
 					actionsContainer.addSteps(request);
 
-				}catch (IOException e) {
+				} catch (Exception e) {
 					logger.error(e.getMessage());
 				}
 			});
