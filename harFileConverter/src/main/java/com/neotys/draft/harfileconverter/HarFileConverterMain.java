@@ -16,13 +16,10 @@ import de.sstoehr.harreader.model.HarEntry;
 import de.sstoehr.harreader.model.HarHeader;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -38,7 +35,6 @@ public class HarFileConverterMain {
 
 
 	public static void main(String[] args) throws HarReaderException {
-		logger.info("HAR File Converter Main launched...");
 
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -108,55 +104,44 @@ public class HarFileConverterMain {
 					;
 					
 					if (currentContentType.isPresent()  && currentHarEntry.getRequest().getPostData().getText() != null) {
-						logger.info(currentHarEntry.getRequest().getUrl());
-						logger.info(currentContentType.toString());
+						//logger.info(currentHarEntry.getRequest().getUrl());
+						//logger.info(currentContentType.toString());
 	 					MediaType mediaType = MediaType.parse(currentContentType.get());
-						
+	 					
+	 					//ANY_TEXT_TYPE :
 	 					if(mediaType.is(MediaType.ANY_TEXT_TYPE)) {
-							logger.info("ANY_TEXT_TYPE");
 							requestBuilder.body(currentHarEntry.getRequest().getPostData().getText());
 						}
+	 					//FORM_CONTENT:
 						else if("application".equalsIgnoreCase(mediaType.type())
 								&& mediaType.subtype().toLowerCase().contains("form-urlencoded")) { 								
-							logger.info("FORM_CONTENT");	
 							requestBuilder.body(currentHarEntry.getRequest().getPostData().getText());
 						}
+						//RAW_CONTENT :
 						else if("application".equalsIgnoreCase(mediaType.type())) {
-							logger.info("RAW_CONTENT");
 							requestBuilder.bodyBinary(currentHarEntry.getRequest().getPostData().getText().getBytes());
 						}
+	 					//MULTIPART_CONTENT:
 						else if("multipart".equalsIgnoreCase(mediaType.type())) {
-							
-							
-							logger.info("MULTIPART_CONTENT");
-							
 							//Get the boundary information in the Content-Type Header:
 							String boundary = ParameterExtractor.extract(currentContentType.get(), "boundary=");
-					        logger.info("Found boundary value: " + boundary);
+					        //logger.info("Found boundary value: " + boundary);
 					        MultipartAnalyzer analyseMultipart = new MultipartAnalyzer(
 					            			currentHarEntry.getRequest().getPostData().getText(),
 					            			boundary);
-					            
-					        if ( !boundary.equals("") ) {
-					        	requestBuilder.parts(analyseMultipart.returnParts());
-					        }
-					        //TODO : gerer le cas ou on ne trouve pas boundary, que fait on ? deja traite dans class MultipartStream
-					        
-							
+					        requestBuilder.parts(analyseMultipart.returnParts());
 						}
 						else
-							logger.info("UNKNOWN FORMAT");
-
+							logger.info("UNKNOWN Content-Type format for : " + currentHarEntry.getRequest().getUrl());
 					}
-					
-		
 					Request request = requestBuilder.build();
-					
 					actionsContainer.addSteps(request);
 
 				} catch (Exception e) {
-					logger.error(e.getMessage());
+					logger.error("Failed conversion URL : " +  currentHarEntry.getRequest().getUrl());
+					logger.error("Cause = " + e.getMessage());
 				}
+				
 			});
 
 			UserPath userPath = UserPath.builder()
@@ -175,8 +160,8 @@ public class HarFileConverterMain {
 			NeoLoadWriter writer = new NeoLoadWriter(project,"C:\\Users\\jerome\\Documents\\NeoLoad Projects");
 			writer.write(true, "7.0", "7.2.2");
 			
+			logger.info("URL steps number = " + userPath.getActions().getSteps().stream().count() );
+			
 		}
-	
-		logger.info("HAR File Converter has ended");
 	}
 }
