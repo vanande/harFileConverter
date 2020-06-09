@@ -28,6 +28,14 @@ import org.slf4j.LoggerFactory;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+/**
+ * <p>This class converts a HTTP ARCHIVE file (.har) to a 
+ * Neoload project format (.nlp). </p>
+ * 
+ * Use the {@code returnParts()} function to return a List< Part > at Neoload format
+ * 
+ *
+ */
 
 public class HarFileConverterMain {
 
@@ -44,7 +52,7 @@ public class HarFileConverterMain {
 		int result = fileChooser.showOpenDialog(fileChooser);
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File harSelectedFile = fileChooser.getSelectedFile();
-			logger.info(String.format("Selected file: %1$s" , harSelectedFile.getAbsolutePath().toString()));
+			logger.info("Selected file: {}" , harSelectedFile.getAbsolutePath());
 
 
 			Container.Builder actionsContainer = Container.builder().name("Actions");
@@ -104,8 +112,7 @@ public class HarFileConverterMain {
 					;
 					
 					if (currentContentType.isPresent()  && currentHarEntry.getRequest().getPostData().getText() != null) {
-						//logger.info(currentHarEntry.getRequest().getUrl());
-						//logger.info(currentContentType.toString());
+
 	 					MediaType mediaType = MediaType.parse(currentContentType.get());
 	 					
 	 					//ANY_TEXT_TYPE :
@@ -125,21 +132,21 @@ public class HarFileConverterMain {
 						else if("multipart".equalsIgnoreCase(mediaType.type())) {
 							//Get the boundary information in the Content-Type Header:
 							String boundary = ParameterExtractor.extract(currentContentType.get(), "boundary=");
-					        //logger.info("Found boundary value: " + boundary);
 					        MultipartAnalyzer analyseMultipart = new MultipartAnalyzer(
 					            			currentHarEntry.getRequest().getPostData().getText(),
 					            			boundary);
 					        requestBuilder.parts(analyseMultipart.returnParts());
 						}
+	 					//UNKNOWN Content-Type format :
 						else
-							logger.info("UNKNOWN Content-Type format for : " + currentHarEntry.getRequest().getUrl());
+							throw new ContentTypeUnknownException("UNKNOWN Content-Type format : " + currentContentType.get());
 					}
 					Request request = requestBuilder.build();
 					actionsContainer.addSteps(request);
 
 				} catch (Exception e) {
-					logger.error("Failed conversion URL : " +  currentHarEntry.getRequest().getUrl());
-					logger.error("Cause = " + e.getMessage());
+					logger.error("Failed conversion URL : {} " ,  currentHarEntry.getRequest().getUrl());
+					logger.error("Cause = {} " , e.getMessage());
 				}
 				
 			});
@@ -160,7 +167,7 @@ public class HarFileConverterMain {
 			NeoLoadWriter writer = new NeoLoadWriter(project,"C:\\Users\\jerome\\Documents\\NeoLoad Projects");
 			writer.write(true, "7.0", "7.2.2");
 			
-			logger.info("URL steps number = " + userPath.getActions().getSteps().stream().count() );
+			
 			
 		}
 	}
