@@ -28,6 +28,7 @@ class MultipartAnalyzerTest {
 						+ "----99--\r\n";
 
 		String boundary = "--99";
+		
 		List<Part> multiPartListExpected = new ArrayList<>();
 		Part part1 = Part.builder().name("param1").value("1").build();
 		multiPartListExpected.add(part1);
@@ -38,13 +39,13 @@ class MultipartAnalyzerTest {
 
 		List<Part> multiPartListToCheck = null;
 		MultipartAnalyzer multipartAnalyzer = new MultipartAnalyzer(multipartBodyString,boundary);
-		
+
 		//Act	
 		try {
 			multiPartListToCheck = multipartAnalyzer.returnParts();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			fail("Exception has been thrown : " + e.getMessage());
+
 		}
 
 		// Assert
