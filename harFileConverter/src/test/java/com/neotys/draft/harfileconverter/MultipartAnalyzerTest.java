@@ -22,20 +22,21 @@ class MultipartAnalyzerTest {
 	void testReturnParts_3SimpleParts() {
 		// Arrange
 		String multipartBodyString = 
-				"----99\r\nContent-Disposition: form-data; name=\"param1\"\r\n\r\n1\r\n"
-						+ "----99\r\nContent-Disposition: form-data; name=\"param2\"\r\n\r\n2\r\n"
-						+ "----99\r\nContent-Disposition: form-data; name=\"param3\"\r\n\r\n3\r\n"
-						+ "----99--\r\n";
+				"----99\r\nContent-Disposition: form-data; name=\"caseMinimal\"\r\n\r\nminimal\r\n"
+				+ "----99\r\nContent-Disposition: form-data; name=\"caseFileName\"; filename=\"myImage.png\"\r\nContent-Type: image/png\r\n\r\nnoMatter\r\n"
+				+ "----99\r\nContent-Disposition: form-data; name=\"caseValueEmpty\"; Content-Type: text/plain\r\n\r\n\r\n"
+				+ "----99--\r\n";
 
 		String boundary = "--99";
 		
 		List<Part> multiPartListExpected = new ArrayList<>();
-		Part part1 = Part.builder().name("param1").value("1").build();
+		Part part1 = Part.builder().name("caseMinimal").value("minimal").build();
 		multiPartListExpected.add(part1);
-		Part part2 = Part.builder().name("param2").value("2").build();
+		Part part2 = Part.builder().name("caseFileName").filename("myImage.png").sourceFilename("myImage.png").contentType("image/png").build();
 		multiPartListExpected.add(part2);
-		Part part3 = Part.builder().name("param3").value("3").build();
+		Part part3 = Part.builder().name("caseValueEmpty").contentType("text/plain").value("").build();
 		multiPartListExpected.add(part3);
+		
 
 		List<Part> multiPartListToCheck = null;
 		MultipartAnalyzer multipartAnalyzer = new MultipartAnalyzer(multipartBodyString,boundary);
@@ -45,12 +46,9 @@ class MultipartAnalyzerTest {
 			multiPartListToCheck = multipartAnalyzer.returnParts();
 		} catch (IOException e) {
 			fail("Exception has been thrown : " + e.getMessage());
-
 		}
-
 		// Assert
 		assertEquals(multiPartListExpected,multiPartListToCheck);
-
 	}
 
 }

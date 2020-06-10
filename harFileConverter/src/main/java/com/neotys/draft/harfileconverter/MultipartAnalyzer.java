@@ -61,6 +61,7 @@ public class MultipartAnalyzer {
         	if ( multipartStreamHeadersMap.containsKey(paramName)) {
         		currentPartBuilder.name(multipartStreamHeadersMap.get(paramName));
         	}
+        	
         	//Get Multipart name Content-Type:
         	paramName = "Content-Type";
         	if ( multipartStreamHeadersMap.containsKey(paramName)) {
