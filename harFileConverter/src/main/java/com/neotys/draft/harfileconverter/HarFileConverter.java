@@ -58,7 +58,7 @@ public class HarFileConverter {
 		Har har = harReader.readFromFile(harSelectedFile);
 		Stream<HarEntry> streamHarEntries = har.getLog().getEntries().stream();
 
-		streamHarEntries.forEach( currentHarEntry -> {
+		streamHarEntries.forEach( currentHarEntry -> { 
 			try {
 
 				this.buildServer(currentHarEntry);
