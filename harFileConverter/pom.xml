@@ -8,6 +8,11 @@
 	<packaging>jar</packaging>
 
 	<properties>
+		<!-- Indiquer l'encodage et le projet en Java 11 -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+
 		<sonar.projectKey>jerome13250_harFileConverter</sonar.projectKey>
 		<sonar.organization>jerome13250</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -26,6 +31,20 @@
 			<version>3.2.5</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.neotys.neoload/common-reader -->
+		<dependency>
+		    <groupId>com.neotys.neoload</groupId>
+		    <artifactId>common-reader</artifactId>
+		    <version>3.2.5</version>
+		    <exclusions>
+		        <exclusion>
+		            <groupId>ch.qos.logback</groupId>
+		            <artifactId>logback-classic</artifactId>
+		        </exclusion>
+	    	</exclusions>
+		</dependency>
+
+		<!-- slf4j -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -52,7 +71,6 @@
 		</dependency>
 
 		<!-- Déclaration de la dépendance vers JUnit -->
-
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
@@ -61,6 +79,7 @@
 		</dependency>
 	</dependencies>
 	
+
 	<build>
 		<plugins>
 			<plugin>

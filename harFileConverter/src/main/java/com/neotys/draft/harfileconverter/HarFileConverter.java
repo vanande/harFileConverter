@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.net.MediaType;
+import com.neotys.neoload.model.listener.EventListener;
 import com.neotys.neoload.model.v3.project.Project;
 import com.neotys.neoload.model.v3.project.server.Server;
 import com.neotys.neoload.model.v3.project.userpath.Container;
@@ -33,17 +35,27 @@ import de.sstoehr.harreader.model.HarHeader;
  * Use the {@code returnParts()} function to return a List< Part > at Neoload format
  * 
  *
- */ 
+ */
 
 public class HarFileConverter {
 
 	static final Logger logger = LoggerFactory.getLogger(HarFileConverter.class);
 
+	//Neoload data:
 	Container.Builder actionsContainer = null;
-	//To avoid server doubles, a list of known servers must be maintained :
-	List<Server> servers = new ArrayList<>();
-	
+	List<Server> servers = new ArrayList<>(); //To avoid server doubles, a list of known servers must be maintained
 
+	
+	//Constructors
+	public HarFileConverter(){
+		//Do nothing, constructor with no Listener
+	}
+
+	public HarFileConverter(final EventListener eventListener){
+		EventListenerUtilsHAR.addEventListener(eventListener);
+	}
+
+	
 	/**
 	 * <p>Use this method to run the global process to convert HAR to Neoload Project (.nlp). </p>
 	 * 
@@ -51,7 +63,12 @@ public class HarFileConverter {
 
 	Project returnProject(File harSelectedFile) throws HarReaderException {
 
+		EventListenerUtilsHAR.startScript(harSelectedFile.getName());
+		
 		logger.info("Selected file: {}" , harSelectedFile.getAbsolutePath());
+		
+		
+		
 		actionsContainer = Container.builder().name("Actions");
 
 		HarReader harReader = new HarReader();
@@ -63,10 +80,12 @@ public class HarFileConverter {
 
 				this.buildServer(currentHarEntry);
 				this.buildRequest(currentHarEntry);
+				EventListenerUtilsHAR.readSupportedAction("Success conversion URL");
 
 			} catch (Exception e) {
-				logger.error("Failed conversion URL : {} " ,  currentHarEntry.getRequest().getUrl());
+				logger.error("Failed conversion for URL : {} " ,  currentHarEntry.getRequest().getUrl());
 				logger.error("Cause = {} " , e.getMessage());
+				EventListenerUtilsHAR.readUnsupportedAction("Failed conversion URL");
 			}
 
 		});
@@ -78,6 +97,9 @@ public class HarFileConverter {
 				.name("Demo User Path")
 				.build();
 
+		
+		EventListenerUtilsHAR.endScript();
+		
 		return Project.builder()
 				.name("test_HARFileConverter_Project")
 				.addUserPaths(userPath)
@@ -132,11 +154,13 @@ public class HarFileConverter {
 			//FORM_CONTENT:
 			else if("application".equalsIgnoreCase(mediaType.type())
 					&& mediaType.subtype().toLowerCase().contains("form-urlencoded")) { 								
+				
+				//TODO Wait for information : do we need URLDecoder.decode() or is it up to neoloadWriter to manage ?
 				requestBuilder.body(currentHarEntry.getRequest().getPostData().getText());
 			}
 			//RAW_CONTENT :
 			else if("application".equalsIgnoreCase(mediaType.type())) {
-				requestBuilder.bodyBinary(currentHarEntry.getRequest().getPostData().getText().getBytes());
+				requestBuilder.bodyBinary(currentHarEntry.getRequest().getPostData().getText().getBytes("UTF8"));
 			}
 			//MULTIPART_CONTENT:
 			else if("multipart".equalsIgnoreCase(mediaType.type())) {
@@ -160,6 +184,8 @@ public class HarFileConverter {
 		
 		Request request = requestBuilder.build();
 		actionsContainer.addSteps(request);
+		
+		EventListenerUtilsHAR.readSupportedAction("HAR Request success");
 
 	}
 
