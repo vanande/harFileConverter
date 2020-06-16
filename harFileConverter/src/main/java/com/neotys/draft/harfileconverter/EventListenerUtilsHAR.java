@@ -4,6 +4,7 @@ import com.neotys.neoload.model.listener.EventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class EventListenerUtil contains the event listeners (pattern design: Observer).
@@ -17,12 +18,13 @@ public class EventListenerUtilsHAR {
 
 	//Constructor
 	public EventListenerUtilsHAR() {
+		//Do nothing
 	}
 
 	//Methods
 	public void addEventListener(EventListener eventlistener) {
 		if (eventlistener != null) { 
-			listEventListeners.add(eventlistener);
+			listEventListeners.add(Objects.requireNonNull(eventlistener));
 		}
 	}
 

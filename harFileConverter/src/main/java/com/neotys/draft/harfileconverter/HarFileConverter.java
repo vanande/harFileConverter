@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -41,8 +44,10 @@ public class HarFileConverter {
 
 	static final Logger logger = LoggerFactory.getLogger(HarFileConverter.class);
 
+	
 	//Neoload data:
 	Container.Builder actionsContainer = null;
+	HashMap<String,Container.Builder> hashMapContainerBuilderForPages = new HashMap<>(); // 1 container created for each "pageref" HAR objects
 	List<Server> servers = new ArrayList<>(); //To avoid server doubles, a list of known servers must be maintained
 
 	//EventListener:
@@ -69,8 +74,6 @@ public class HarFileConverter {
 		
 		logger.info("Selected file: {}" , harSelectedFile.getAbsolutePath());
 		
-		
-		
 		actionsContainer = Container.builder().name("Actions");
 
 		HarReader harReader = new HarReader();
@@ -79,7 +82,7 @@ public class HarFileConverter {
 
 		streamHarEntries.forEach( currentHarEntry -> { 
 			try {
-
+				this.buildContainer(currentHarEntry); //used for har "pageref" management
 				this.buildServer(currentHarEntry);
 				this.buildRequest(currentHarEntry);
 				eventListenerUtilsHAR.readSupportedAction("Success conversion URL");
@@ -91,7 +94,14 @@ public class HarFileConverter {
 			}
 
 		});
-
+		
+		//Add all Containers in hashMapContainerBuilderForPages to the "root" container : actionsContainer
+		hashMapContainerBuilderForPages.entrySet().stream()
+			.map(Map.Entry::getValue)
+			.forEach(currentContainerBuilder ->
+			actionsContainer.addSteps(currentContainerBuilder.build()));
+		
+		
 		UserPath userPath = UserPath.builder()
 				.init(Container.builder().name("Init").build())
 				.actions(actionsContainer.build())
@@ -162,7 +172,7 @@ public class HarFileConverter {
 			}
 			//RAW_CONTENT :
 			else if("application".equalsIgnoreCase(mediaType.type())) {
-				requestBuilder.bodyBinary(currentHarEntry.getRequest().getPostData().getText().getBytes("UTF8"));
+				requestBuilder.bodyBinary(currentHarEntry.getRequest().getPostData().getText().getBytes(StandardCharsets.UTF_8));
 			}
 			//MULTIPART_CONTENT:
 			else if("multipart".equalsIgnoreCase(mediaType.type())) {
@@ -185,10 +195,12 @@ public class HarFileConverter {
 
 		
 		Request request = requestBuilder.build();
-		actionsContainer.addSteps(request);
-		
-		eventListenerUtilsHAR.readSupportedAction("HAR Request success");
 
+		//Get the pageRef and feed the correspondant Container:
+		String currentPageRef =  (currentHarEntry.getPageref() != null && !currentHarEntry.getPageref().isEmpty()) ?  currentHarEntry.getPageref() : "page_default";
+		hashMapContainerBuilderForPages.get(currentPageRef).addSteps(request);
+		
+		
 	}
 
 	/**
@@ -213,7 +225,20 @@ public class HarFileConverter {
 
 	}
 	
-	
-	
-	
+	/**
+	 * <p>This method updates the HashMap of Container (Neoload) from a HarEntry Object (har-reader).
+	 * The objective is to create a Container for each object "page" contained in HAR file.</p>
+	 * 
+	 */
+
+	private void buildContainer(HarEntry currentHarEntry) {
+		//Sets "page_default" as the pageRef if is empty String or null
+		String currentPageRef =  (currentHarEntry.getPageref() != null && !currentHarEntry.getPageref().isEmpty()) ?  currentHarEntry.getPageref() : "page_default";
+
+		if (!hashMapContainerBuilderForPages.containsKey(currentPageRef)) {
+			hashMapContainerBuilderForPages.put(currentPageRef, Container.builder().name(currentPageRef));
+
+		}
+
+	}
 }

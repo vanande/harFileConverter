@@ -18,7 +18,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 /**
  * <p>Main function to test HarFileConverter Class</p>
  * 
- */
+ */ 
 
 public class HarFileConverterMain implements EventListener { 
 

@@ -31,17 +31,19 @@
 			<version>3.2.5</version>
 		</dependency>
 
+
+
 		<!-- https://mvnrepository.com/artifact/com.neotys.neoload/common-reader -->
 		<dependency>
-		    <groupId>com.neotys.neoload</groupId>
-		    <artifactId>common-reader</artifactId>
-		    <version>3.2.5</version>
-		    <exclusions>
-		        <exclusion>
-		            <groupId>ch.qos.logback</groupId>
-		            <artifactId>logback-classic</artifactId>
-		        </exclusion>
-	    	</exclusions>
+			<groupId>com.neotys.neoload</groupId>
+			<artifactId>common-reader</artifactId>
+			<version>3.2.5</version>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- slf4j -->
@@ -78,7 +80,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 
 	<build>
 		<plugins>
