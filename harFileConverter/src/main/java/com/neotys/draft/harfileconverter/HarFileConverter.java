@@ -45,6 +45,8 @@ public class HarFileConverter {
 	Container.Builder actionsContainer = null;
 	List<Server> servers = new ArrayList<>(); //To avoid server doubles, a list of known servers must be maintained
 
+	//EventListener:
+	EventListenerUtilsHAR eventListenerUtilsHAR = new EventListenerUtilsHAR();
 	
 	//Constructors
 	public HarFileConverter(){
@@ -52,7 +54,7 @@ public class HarFileConverter {
 	}
 
 	public HarFileConverter(final EventListener eventListener){
-		EventListenerUtilsHAR.addEventListener(eventListener);
+		eventListenerUtilsHAR.addEventListener(eventListener);
 	}
 
 	
@@ -63,7 +65,7 @@ public class HarFileConverter {
 
 	Project returnProject(File harSelectedFile) throws HarReaderException {
 
-		EventListenerUtilsHAR.startScript(harSelectedFile.getName());
+		eventListenerUtilsHAR.startScript(harSelectedFile.getName());
 		
 		logger.info("Selected file: {}" , harSelectedFile.getAbsolutePath());
 		
@@ -80,12 +82,12 @@ public class HarFileConverter {
 
 				this.buildServer(currentHarEntry);
 				this.buildRequest(currentHarEntry);
-				EventListenerUtilsHAR.readSupportedAction("Success conversion URL");
+				eventListenerUtilsHAR.readSupportedAction("Success conversion URL");
 
 			} catch (Exception e) {
 				logger.error("Failed conversion for URL : {} " ,  currentHarEntry.getRequest().getUrl());
 				logger.error("Cause = {} " , e.getMessage());
-				EventListenerUtilsHAR.readUnsupportedAction("Failed conversion URL");
+				eventListenerUtilsHAR.readUnsupportedAction("Failed conversion URL");
 			}
 
 		});
@@ -98,7 +100,7 @@ public class HarFileConverter {
 				.build();
 
 		
-		EventListenerUtilsHAR.endScript();
+		eventListenerUtilsHAR.endScript();
 		
 		return Project.builder()
 				.name("test_HARFileConverter_Project")
@@ -185,7 +187,7 @@ public class HarFileConverter {
 		Request request = requestBuilder.build();
 		actionsContainer.addSteps(request);
 		
-		EventListenerUtilsHAR.readSupportedAction("HAR Request success");
+		eventListenerUtilsHAR.readSupportedAction("HAR Request success");
 
 	}
 
