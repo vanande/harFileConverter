@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ class HarFileConverterTest {
 		assertThrows(HarReaderException.class , () -> harFileConverter.returnProject(harSelectedFile));
 	}
 
-	
+
 	@Test
 	void testSimpleGETFile() {
 		//ARRANGE
@@ -55,7 +56,10 @@ class HarFileConverterTest {
 		expectedRequestBuilder.addHeaders(Header.builder().name("header1").value("1").build());
 		expectedRequestBuilder.addHeaders(Header.builder().name("header2").value("2").build());
 
-		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(expectedRequestBuilder.build());
+		//Subcontainer that contains "page_1" pageRef har object.
+		Container pageRef_1 = Container.builder().name("page_1").addSteps(expectedRequestBuilder.build()).build();
+		//Actions container that contains all pages containers
+		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef_1);
 
 		UserPath expectedUserPath = UserPath.builder()
 				.init(Container.builder().name("Init").build())
@@ -80,15 +84,15 @@ class HarFileConverterTest {
 			assertEquals(expectedProject.getServers(),ProjectUnderTest.getServers(), "Servers are different from expected");
 			assertEquals(expectedProject.getUserPaths(),ProjectUnderTest.getUserPaths(), "UserPath is different from expected");
 			assertEquals(expectedProject,ProjectUnderTest, "Project is different from expected");
-			
-		
+
+
 		} catch (HarReaderException e) {
 			fail("Exception has been thrown : " + e.getMessage());
 		}
 
 	}
 
-	
+
 	@Test
 	void testPostTextFile() {
 		//ARRANGE
@@ -110,11 +114,13 @@ class HarFileConverterTest {
 		expectedRequestBuilder.addHeaders(Header.builder().name("header1").value("1").build());
 		expectedRequestBuilder.addHeaders(Header.builder().name("header2").value("2").build());
 		expectedRequestBuilder.addHeaders(Header.builder().name("Content-Type").value("text/plain").build());
-		
 		expectedRequestBuilder.body("fake text");
 
+		//Subcontainer that contains "page_1" pageRef har object.
+		Container pageRef = Container.builder().name("page_1").addSteps(expectedRequestBuilder.build()).build();
+		//Actions container that contains all pages containers
+		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef);
 
-		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(expectedRequestBuilder.build());
 
 		UserPath expectedUserPath = UserPath.builder()
 				.init(Container.builder().name("Init").build())
@@ -139,13 +145,13 @@ class HarFileConverterTest {
 			assertEquals(expectedProject.getServers(),ProjectUnderTest.getServers(), "Servers are different from expected");
 			assertEquals(expectedProject.getUserPaths(),ProjectUnderTest.getUserPaths(), "UserPath is different from expected");
 			assertEquals(expectedProject,ProjectUnderTest, "Project is different from expected");
-		
+
 		} catch (HarReaderException e) {
 			fail("Exception has been thrown : " + e.getMessage());
 		}
 
 	}
-	
+
 	@Test
 	void testPostFormFile() {
 		//ARRANGE
@@ -167,11 +173,12 @@ class HarFileConverterTest {
 		expectedRequestBuilder.addHeaders(Header.builder().name("header1").value("1").build());
 		expectedRequestBuilder.addHeaders(Header.builder().name("header2").value("2").build());
 		expectedRequestBuilder.addHeaders(Header.builder().name("Content-Type").value("application/x-www-form-urlencoded").build());
-		
 		expectedRequestBuilder.body("{\"requests\":[{\"indexName\":\"PROD_learning-content_FR\",\"params\":\"query=&page=0&highlightPreTag=%3Cais-highlight-0000000000%3E&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&facets=%5B%5D&tagFilters=\"}]}");
 
-
-		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(expectedRequestBuilder.build());
+		//Subcontainer that contains "page_1" pageRef har object.
+		Container pageRef_1 = Container.builder().name("page_1").addSteps(expectedRequestBuilder.build()).build();
+		//Actions container that contains all pages containers
+		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef_1);
 
 		UserPath expectedUserPath = UserPath.builder()
 				.init(Container.builder().name("Init").build())
@@ -196,14 +203,77 @@ class HarFileConverterTest {
 			assertEquals(expectedProject.getServers(),ProjectUnderTest.getServers(), "Servers are different from expected");
 			assertEquals(expectedProject.getUserPaths(),ProjectUnderTest.getUserPaths(), "UserPath is different from expected");
 			assertEquals(expectedProject,ProjectUnderTest, "Project is different from expected");
-		
+
 		} catch (HarReaderException e) {
 			fail("Exception has been thrown : " + e.getMessage());
 		}
 	}
+
+
+
 	
+	@Test
+	void testPostRawFile() { // "https://mail.google.com/sync/u/0/i/s?hl=fr&c=9"
+		//ARRANGE
+		String HARFileNameToTest = "PostRawFile.har";
+
+		Server expectedServer = Server.builder()
+				.name("mail.google.com")
+				.host("mail.google.com")
+				.port("443") //default for https
+				.scheme(Server.Scheme.valueOf("HTTPS"))
+				.build();
+
+		Request.Builder expectedRequestBuilder = Request.builder()
+				.name("/sync/u/0/i/s")
+				.url("https://mail.google.com/sync/u/0/i/s?hl=fr&c=9")
+				.method("POST")
+				.server("mail.google.com");
+
+		expectedRequestBuilder.addHeaders(Header.builder().name(":method").value("POST").build());
+		expectedRequestBuilder.addHeaders(Header.builder().name(":authority").value("mail.google.com").build());
+		expectedRequestBuilder.addHeaders(Header.builder().name("content-type").value("application/json").build());
+		
+		String expectedbodyBinary_textFormat = "test";
+		expectedRequestBuilder.bodyBinary(expectedbodyBinary_textFormat.getBytes(StandardCharsets.UTF_8));
+
+		//Subcontainer that contains "page_default" since no pageRef har object in this case :
+		Container pageRef_1 = Container.builder().name("page_default").addSteps(expectedRequestBuilder.build()).build();
+		//Actions container that contains all pages containers
+		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef_1);
+
+		UserPath expectedUserPath = UserPath.builder()
+				.init(Container.builder().name("Init").build())
+				.actions(expectedActionsContainer.build())
+				.end(Container.builder().name("End").build())
+				.name("Demo User Path")
+				.build();
+
+		Project expectedProject = Project.builder()
+				.name("test_HARFileConverter_Project")
+				.addUserPaths(expectedUserPath)
+				.addServers(expectedServer)
+				.build();
+
+		//ACT
+		File harSelectedFile = new File(classLoader.getResource(HARFileNameToTest).getFile());
+
+		//ASSERT
+		try {
+			HarFileConverter harFileConverter = new HarFileConverter();
+			Project ProjectUnderTest = harFileConverter.returnProject(harSelectedFile);
+			assertEquals(expectedProject.getServers(),ProjectUnderTest.getServers(), "Servers are different from expected");
+			assertEquals(expectedProject.getUserPaths(),ProjectUnderTest.getUserPaths(), "UserPath is different from expected");
+			assertEquals(expectedProject,ProjectUnderTest, "Project is different from expected");
+
+		} catch (HarReaderException e) {
+			fail("Exception has been thrown : " + e.getMessage());
+		}
+	}
+
+
 	
-	
+	//POST MULTI PART:
 	@Test
 	void testPostMultiPartFile() {
 		//ARRANGE
@@ -224,7 +294,7 @@ class HarFileConverterTest {
 
 		expectedRequestBuilder.addHeaders(Header.builder().name("Host").value("jack.intranet.neotys.com:9090").build());
 		expectedRequestBuilder.addHeaders(Header.builder().name("Content-Type").value("multipart/form-data; boundary=---------------------------3619210861134004098289507961").build());
-		
+
 		//Get the boundary information in the Content-Type Header:
 		String expectedBoundary = "---------------------------3619210861134004098289507961";
 		MultipartAnalyzer analyseMultipart = new MultipartAnalyzer(
@@ -236,8 +306,11 @@ class HarFileConverterTest {
 			fail("Exception has been thrown : " + e.getMessage());
 		}
 
-		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(expectedRequestBuilder.build());
-
+		//Subcontainer that contains "page_1" pageRef har object.
+		Container pageRef_1 = Container.builder().name("page_1").addSteps(expectedRequestBuilder.build()).build();
+		//Actions container that contains all pages containers
+		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef_1);
+		
 		UserPath expectedUserPath = UserPath.builder()
 				.init(Container.builder().name("Init").build())
 				.actions(expectedActionsContainer.build())
@@ -261,13 +334,13 @@ class HarFileConverterTest {
 			assertEquals(expectedProject.getServers(),ProjectUnderTest.getServers(), "Servers are different from expected");
 			assertEquals(expectedProject.getUserPaths(),ProjectUnderTest.getUserPaths(), "UserPath is different from expected");
 			assertEquals(expectedProject,ProjectUnderTest, "Project is different from expected");
-		
+
 		} catch (HarReaderException e) {
 			fail("Exception has been thrown : " + e.getMessage());
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 }

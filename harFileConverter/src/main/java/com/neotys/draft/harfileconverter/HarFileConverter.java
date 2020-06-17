@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +29,7 @@ import de.sstoehr.harreader.HarReaderException;
 import de.sstoehr.harreader.model.Har;
 import de.sstoehr.harreader.model.HarEntry;
 import de.sstoehr.harreader.model.HarHeader;
-
+ 
 /**
  * <p>This class converts a HTTP ARCHIVE file (.har) to a 
  * Neoload project format (.nlp). </p>
@@ -72,7 +71,7 @@ public class HarFileConverter {
 
 		eventListenerUtilsHAR.startScript(harSelectedFile.getName());
 		
-		logger.info("Selected file: {}" , harSelectedFile.getAbsolutePath());
+		//logger.info("Selected file: {}" , harSelectedFile.getAbsolutePath());
 		
 		actionsContainer = Container.builder().name("Actions");
 
@@ -167,7 +166,7 @@ public class HarFileConverter {
 			else if("application".equalsIgnoreCase(mediaType.type())
 					&& mediaType.subtype().toLowerCase().contains("form-urlencoded")) { 								
 				
-				//TODO Wait for information : do we need URLDecoder.decode() or is it up to neoloadWriter to manage ?
+				//Do we need URLDecoder.decode() or is it up to neoloadWriter to manage ?
 				requestBuilder.body(currentHarEntry.getRequest().getPostData().getText());
 			}
 			//RAW_CONTENT :
@@ -227,7 +226,8 @@ public class HarFileConverter {
 	
 	/**
 	 * <p>This method updates the HashMap of Container (Neoload) from a HarEntry Object (har-reader).
-	 * The objective is to create a Container for each object "page" contained in HAR file.</p>
+	 * The objective is to create a Container for each object "pageref" contained in HAR file.
+	 * All entries where pageref is missing will be stored in the "page_default" Container. </p>
 	 * 
 	 */
 
