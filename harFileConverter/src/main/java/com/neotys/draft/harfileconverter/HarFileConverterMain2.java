@@ -4,6 +4,8 @@ package com.neotys.draft.harfileconverter;
 import com.neotys.neoload.model.listener.EventListener;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,42 +14,40 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
- * <p>Main function to test HarFileConverter Class</p>
+ * <p>Main 2 function to test HarFileConverter Class, this one will execute the har
+ *  conversion on all files that are in a specific folder</p>
  * 
  */ 
 
-public class HarFileConverterMain implements EventListener { 
+public class HarFileConverterMain2 implements EventListener { 
 
-	static final Logger logger = LoggerFactory.getLogger(HarFileConverterMain.class);
+	static final Logger logger = LoggerFactory.getLogger(HarFileConverterMain2.class);
 	
 	int nbActionsRequestSuccessDecoding =0;
 	int nbActionsRequestFailDecoding =0;
 	
 	
 	//Constructor :
-	public HarFileConverterMain() {
+	public HarFileConverterMain2() {
 		// Do nothing, we need an instantiated Object harFileConverterMain to use as EventListener 
 		// for the HarFileConverter constructor 
 	}
 
 	
 	public static void main(String[] args) {
-
-		HarFileConverterMain harFileConverterMain = new HarFileConverterMain();
+	
+		File folderHAR = new File("C:\\Users\\jerome\\Downloads\\");
+		File[] listHarFiles = folderHAR.listFiles((dir, name) -> name.toLowerCase().endsWith(".har"));
 		
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("HTTP Archive(.har)", "har");
-		fileChooser.setFileFilter(filter);
-
-		int result = fileChooser.showOpenDialog(fileChooser);
-		if (result == JFileChooser.APPROVE_OPTION) {
-			File harSelectedFile = fileChooser.getSelectedFile();
-			
+		Stream<File> stream1 = Arrays.stream(listHarFiles);
+        
+		stream1.forEach(currentHarFile -> {
+		
+			HarFileConverterMain2 harFileConverterMain = new HarFileConverterMain2();
 			HarFileConverter harFileConverter = new HarFileConverter ( harFileConverterMain ); //constructor with EventListener
-			harFileConverter.writeProject(harSelectedFile, new File("C:\\Users\\jerome\\Documents\\NeoLoad Projects\\" + "test.nlp"));
+			harFileConverter.writeProject(currentHarFile, new File("C:\\Users\\jerome\\Documents\\NeoLoad Projects\\" + "test.nlp"));
 			
-		}
+		});
 	}
 
 

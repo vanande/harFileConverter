@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ import com.neotys.neoload.model.v3.project.userpath.Container;
 import com.neotys.neoload.model.v3.project.userpath.Header;
 import com.neotys.neoload.model.v3.project.userpath.Request;
 import com.neotys.neoload.model.v3.project.userpath.UserPath;
+import com.neotys.neoload.model.v3.writers.neoload.NeoLoadWriter;
 
 import de.sstoehr.harreader.HarReader;
 import de.sstoehr.harreader.HarReaderException;
@@ -48,7 +50,7 @@ public class HarFileConverter {
 	Container.Builder actionsContainer = null;
 	HashMap<String,Container.Builder> hashMapContainerBuilderForPages = new HashMap<>(); // 1 container created for each "pageref" HAR objects
 	List<Server> servers = new ArrayList<>(); //To avoid server doubles, a list of known servers must be maintained
-
+	
 	//EventListener:
 	EventListenerUtilsHAR eventListenerUtilsHAR = new EventListenerUtilsHAR();
 	
@@ -63,15 +65,38 @@ public class HarFileConverter {
 
 	
 	/**
-	 * <p>Use this method to run the global process to convert HAR to Neoload Project (.nlp). </p>
+	 * <p>Use this method to write the Neoload Project (.nlp) in . </p>
+	 * 
+	 */
+	
+	public void writeProject(File harSelectedFile, File neoloadProjectFile) {
+		
+		try {
+			String neoloadProjectFolder = neoloadProjectFile.getParent();
+			String neoloadProjectName = FilenameUtils.removeExtension(neoloadProjectFile.getName());
+			logger.info("NeoloadProjectFolder = {}",neoloadProjectFolder);
+			logger.info("NeoloadProjectName = {}",neoloadProjectName);
+					
+			NeoLoadWriter writer = new NeoLoadWriter(returnProject(harSelectedFile,neoloadProjectName),neoloadProjectFolder);
+			writer.write(true, "7.0", "7.2.2");
+			
+		} catch (HarReaderException e) {
+			logger.error("File conversion has failed : {} " ,  harSelectedFile.getAbsolutePath());
+			logger.error("Cause = {} " , e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * <p>Use this method to convert HAR file to Neoload Project (.nlp). </p>
+	 * 
+	 * @return Neoload Project
 	 * 
 	 */
 
-	Project returnProject(File harSelectedFile) throws HarReaderException {
+	Project returnProject(File harSelectedFile, String neoloadProjectName) throws HarReaderException {
 
 		eventListenerUtilsHAR.startScript(harSelectedFile.getName());
-		
-		//logger.info("Selected file: {}" , harSelectedFile.getAbsolutePath());
 		
 		actionsContainer = Container.builder().name("Actions");
 
@@ -88,7 +113,7 @@ public class HarFileConverter {
 
 			} catch (Exception e) {
 				logger.error("Failed conversion for URL : {} " ,  currentHarEntry.getRequest().getUrl());
-				logger.error("Cause = {} " , e.getMessage());
+				logger.error("Error Message = {}" , e.getMessage());
 				eventListenerUtilsHAR.readUnsupportedAction("Failed conversion URL");
 			}
 
@@ -112,7 +137,7 @@ public class HarFileConverter {
 		eventListenerUtilsHAR.endScript();
 		
 		return Project.builder()
-				.name("test_HARFileConverter_Project")
+				.name(neoloadProjectName)
 				.addUserPaths(userPath)
 				.addServers(servers.toArray(new Server[0]))
 				.build();
@@ -191,7 +216,7 @@ public class HarFileConverter {
 		else if (!currentContentType.isPresent() && currentHarEntry.getRequest().getPostData().getText() != null) {
 			throw new ContentTypeException("Content-Type NOT FOUND");
 		}
-
+ 
 		
 		Request request = requestBuilder.build();
 

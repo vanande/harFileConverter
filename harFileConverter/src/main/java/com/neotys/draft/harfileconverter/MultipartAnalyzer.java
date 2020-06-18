@@ -2,7 +2,10 @@ package com.neotys.draft.harfileconverter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,77 +26,127 @@ import org.slf4j.LoggerFactory;
  * Use the {@code returnParts()} function to return a List< Part > at Neoload format
  * 
  *
- */ 
+ */  
 
 public class MultipartAnalyzer {
 
 	private ByteArrayInputStream content;
 	private byte[] boundary;
 	static final Logger logger = LoggerFactory.getLogger(MultipartAnalyzer.class);
+
+	Map<String, String> multipartStreamHeadersMap = null;
+	Part.Builder currentPartBuilder = null;
 	
-    public MultipartAnalyzer(String multipartBodyString, String boundaryString) {
-    	
-        boundary = boundaryString.getBytes();
-        content = new ByteArrayInputStream(multipartBodyString.getBytes());
-    }
-        
-    public List<Part> returnParts() throws IOException  {
+	
+	public MultipartAnalyzer(String multipartBodyString, String boundaryString) {
+		//TODO : Warning, still questions about getBytes Charset...
+		boundary = boundaryString.getBytes(StandardCharsets.UTF_8);
+		content = new ByteArrayInputStream(multipartBodyString.getBytes(StandardCharsets.UTF_8));
+	} 
 
-    	List<Part> multiPartList = new ArrayList<>();
-    	
-        @SuppressWarnings("deprecation")
-        MultipartStream multipartStream = new MultipartStream(content, boundary);
-        
-        boolean nextPart = multipartStream.skipPreamble();
-        while (nextPart) {
-        	Part.Builder currentPartBuilder = Part.builder();
+	public List<Part> returnParts() throws IOException  {
 
-        	//need to replace CRLF by ';' because org.apache.commons.fileupload ParameterParser does not understand CRLF as 
-        	String multipartStreamHeaders = multipartStream.readHeaders().replaceAll("\r\n", ";").replace(": ", "="); 
-        	ParameterParser multiPartParamParser = new ParameterParser();
-        	
-        	char[] separators = {';'};
-        	Map<String, String> multipartStreamHeadersMap = multiPartParamParser.parse(multipartStreamHeaders, separators);
-        	
-        	String paramName = "";
-        	//Get Multipart name value:
-        	paramName = "name";
-        	if ( multipartStreamHeadersMap.containsKey(paramName)) {
-        		currentPartBuilder.name(multipartStreamHeadersMap.get(paramName));
-        	}
-        	
-        	//Get Multipart name Content-Type:
-        	paramName = "Content-Type";
-        	if ( multipartStreamHeadersMap.containsKey(paramName)) {
-        		currentPartBuilder.contentType(multipartStreamHeadersMap.get(paramName));
-        	}
-        	 //Get Multipart fileName:
-        	paramName = "filename";
-        	if ( multipartStreamHeadersMap.containsKey(paramName)) {
-        		currentPartBuilder.filename(multipartStreamHeadersMap.get(paramName));
-        		//sourceFilename is used by PartWriter (v3.writers.neoload.userpath) to detect if data is text or file :
-        		currentPartBuilder.sourceFilename(multipartStreamHeadersMap.get(paramName));
-        	}
-        	
-        	//Get value :
-	        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            multipartStream.readBodyData(stream);
-            //Pas de fileName donc on copie les donnees dans PartBuilder.value :
-            if (!multipartStreamHeadersMap.containsKey("filename")) {
-            	if (stream.size()!=0 ) { 
-            		currentPartBuilder.value( new String(stream.toByteArray()));
-            	}
-            	else { // stream size is null
-                	currentPartBuilder.value(""); //Otherwise Neoload Writer Optional.get fails
-                } 
-            }
-            
-            //Add currentPart to Part List:
-            multiPartList.add(currentPartBuilder.build());
-            
-            nextPart = multipartStream.readBoundary();
-        }
-        return multiPartList;
-    }
+		List<Part> multiPartList = new ArrayList<>();
+
+		@SuppressWarnings("deprecation")
+		MultipartStream multipartStream = new MultipartStream(content, boundary);
+
+		boolean nextPart = multipartStream.skipPreamble();
+		while (nextPart) {
+			currentPartBuilder = Part.builder();
+
+			//need to replace CRLF by ';' as CRLF can be a separator between parameters
+			//need to replace ": " with classic name/value separator "="
+			String multipartStreamHeaders = multipartStream.readHeaders().replaceAll("\r\n", ";").replace(": ", "="); 
+			ParameterParser multiPartParamParser = new ParameterParser();
+			char[] separators = {';'};
+			multipartStreamHeadersMap = multiPartParamParser.parse(multipartStreamHeaders, separators);
+
+			//Get Multipart header value for : name
+			partBuilderSetHeader("name");
+			//Get Multipart header value for : Content-Type:
+			partBuilderSetHeader("Content-Type");
+			//Get Multipart fileName AND sourceFilename, note that if file data is present a complete sourcefilename will be set later
+			partBuilderSetHeader("filename");
+
+			//Get value :
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			multipartStream.readBodyData(stream);
+			partBuilderSetValue(stream);
+
+			//Add currentPart to Part List:
+			multiPartList.add(currentPartBuilder.build());
+
+			nextPart = multipartStream.readBoundary();
+		}
+		return multiPartList;
+	}
+
+	/**
+	 * <p>This method adds the parameter (paramName) from Apache fileupload Map object to the the Part.Builder.</p>
+	 * 
+	 *
+	 */ 
+	
+	public void partBuilderSetHeader(String paramName) {
+
+		if ( multipartStreamHeadersMap.containsKey(paramName)) {
+			if ( paramName.equalsIgnoreCase("name") ) {
+				currentPartBuilder.name(multipartStreamHeadersMap.get(paramName));
+			}
+			else if ( paramName.equalsIgnoreCase("Content-Type")) {
+				currentPartBuilder.contentType(multipartStreamHeadersMap.get(paramName));
+			}
+			else if ( paramName.equalsIgnoreCase("filename")) {
+				currentPartBuilder.filename(multipartStreamHeadersMap.get(paramName));
+				//note that if file data is present, a file will be re-built and a complete sourcefilename will replace this value:
+				currentPartBuilder.sourceFilename(multipartStreamHeadersMap.get(paramName));
+			}
+			else {
+				logger.error("Unsupported parameter name : {} in function PartBuilderSet", paramName);
+			}
+		}
+	}
+	
+	
+	/**
+	 * <p>This method adds the data value to the the Part.Builder.value. If the filename is present in the headers and 
+	 * data value is present, this data is used to re-build the original file in the Neoload project, Part.Builder.sourcefilename will be set
+	 * accordingly </p>
+	 * @throws IOException 
+	 *
+	 */ 
+	
+	public void partBuilderSetValue(ByteArrayOutputStream stream) throws IOException {
+
+		//fileName is present so we recreate the file in the folder of neoload project if data value is present:
+		if (multipartStreamHeadersMap.containsKey("filename")) { 
+			if (stream.size()!=0 ) { 
+				//recreate file
+				String recreatedFileName = "C:\\Users\\jerome\\Documents\\NeoLoad Projects\\" + multipartStreamHeadersMap.get("filename");
+				String recreatedFileNameRelativeToProject = System.getProperty("file.separator") + multipartStreamHeadersMap.get("filename");
+				logger.info("Recreated file {}", recreatedFileName);
+				try(OutputStream outputStream = new FileOutputStream(recreatedFileName)) {
+				    stream.writeTo(outputStream);
+				    currentPartBuilder.sourceFilename(recreatedFileNameRelativeToProject);
+				}
+			
+			}
+			else { // stream size is null, hence file can't be re-created
+				logger.info("Missing data for {}, file can't be created", multipartStreamHeadersMap.get("filename"));
+			} 
+		}
+		else { //Pas de fileName donc on copie les donnees dans PartBuilder.value
+			if (stream.size()!=0 ) { 
+				currentPartBuilder.value( new String(stream.toByteArray()));
+			}
+			else { // stream size is null
+				currentPartBuilder.value(""); //Otherwise Neoload Writer Optional.get fails
+			} 
+		}
+		
+		
+	}
+	
+	
 }
-
