@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,6 @@ public class HarFileConverterMain2 implements EventListener {
 		Stream<File> stream1 = Arrays.stream(listHarFiles);
         
 		stream1.forEach(currentHarFile -> {
-		
 			HarFileConverterMain2 harFileConverterMain = new HarFileConverterMain2();
 			HarFileConverter harFileConverter = new HarFileConverter ( harFileConverterMain ); //constructor with EventListener
 			harFileConverter.writeProject(currentHarFile, new File("C:\\Users\\jerome\\Documents\\NeoLoad Projects\\" + "test.nlp"));

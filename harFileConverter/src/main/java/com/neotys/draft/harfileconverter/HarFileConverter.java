@@ -39,7 +39,7 @@ import de.sstoehr.harreader.model.HarHeader;
  * Use the {@code returnParts()} function to return a List< Part > at Neoload format
  * 
  *
- */
+ */ 
 
 public class HarFileConverter {
 
@@ -74,8 +74,6 @@ public class HarFileConverter {
 		try {
 			String neoloadProjectFolder = neoloadProjectFile.getParent();
 			String neoloadProjectName = FilenameUtils.removeExtension(neoloadProjectFile.getName());
-			logger.info("NeoloadProjectFolder = {}",neoloadProjectFolder);
-			logger.info("NeoloadProjectName = {}",neoloadProjectName);
 					
 			NeoLoadWriter writer = new NeoLoadWriter(returnProject(harSelectedFile,neoloadProjectName),neoloadProjectFolder);
 			writer.write(true, "7.0", "7.2.2");

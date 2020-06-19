@@ -23,9 +23,7 @@ public class EventListenerUtilsHAR {
 
 	//Methods
 	public void addEventListener(EventListener eventlistener) {
-		if (eventlistener != null) { 
-			listEventListeners.add(Objects.requireNonNull(eventlistener));
-		}
+		listEventListeners.add(Objects.requireNonNull(eventlistener));
 	}
 
 
