@@ -40,7 +40,7 @@ import de.sstoehr.harreader.model.HarHeader;
  * Use the {@code writeProject()} function to write the Neoload project
  * 
  *
- */  
+ */ 
 
 public class HarFileConverter {
 
@@ -80,7 +80,7 @@ public class HarFileConverter {
 			NeoLoadWriter writer = new NeoLoadWriter(returnProject(harSelectedFile,neoloadProjectName),neoloadProjectFolder);
 			writer.write(true, "7.0", "7.2.2");
 
-		} catch (HarReaderException e) {
+		} catch (Exception e) {
 			logger.error("File conversion has failed : {} " ,  harSelectedFile.getAbsolutePath());
 			logger.error("Cause = {} " , e.getMessage());
 		}
@@ -109,12 +109,11 @@ public class HarFileConverter {
 		streamHarEntries.sorted(Comparator.comparing(HarEntry::getStartedDateTime))
 		.forEach( currentHarEntry -> {
 
-			//logger.info("URL: {} , time = {}" ,  currentHarEntry.getRequest().getUrl(), currentHarEntry.getStartedDateTime());
-
+			
 			try {
 				this.buildContainer(currentHarEntry); //used for har "pageref" management
 				this.buildServer(currentHarEntry);
-				this.buildRequest(currentHarEntry);
+				this.storeRequest(currentHarEntry);
 				eventListenerUtilsHAR.readSupportedAction("Success conversion URL");
 
 			} catch (Exception e) {
@@ -155,7 +154,7 @@ public class HarFileConverter {
 	 * 
 	 */
 
-	private void buildRequest(HarEntry currentHarEntry) throws IOException {
+	Request createRequest(HarEntry currentHarEntry) throws IOException {
 
 		URL url = new URL(currentHarEntry.getRequest().getUrl());
 
@@ -166,7 +165,7 @@ public class HarFileConverter {
 		Header.builder()
 		.name(currentHarHeader.getName())
 		.value(currentHarHeader.getValue())
-		.build() 
+		.build()  
 				);
 
 		Request.Builder requestBuilder = Request.builder()
@@ -231,20 +230,25 @@ public class HarFileConverter {
 
 		}
 
+		return ( requestBuilder.build() );
 
-		Request request = requestBuilder.build();
-
+	}
+	
+	
+	
+	void storeRequest(HarEntry currentHarEntry) throws IOException {
+		Request request = createRequest(currentHarEntry);
+		
 		//Get the pageRef and feed the correspondant Container, if pageRef is empty String or null, we will use the "root" actionsContainer
 		if (currentHarEntry.getPageref() != null && !currentHarEntry.getPageref().isEmpty()) {
 			String currentPageRef =  currentHarEntry.getPageref();
 			hashMapContainerBuilderForPages.get(currentPageRef).addSteps(request);
 		}
-		else { //pageRef is empty String or null:
+		else { //pageRef is empty String or null => use the "root" actionsContainer:
 			actionsContainer.addSteps(request);
 		}
-
-
 	}
+	
 
 	/**
 	 * <p>This method updates the Server (Neoload) List from a HarEntry Object (har-reader).

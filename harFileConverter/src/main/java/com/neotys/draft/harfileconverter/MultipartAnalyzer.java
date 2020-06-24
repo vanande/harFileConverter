@@ -37,6 +37,8 @@ public class MultipartAnalyzer {
 	Map<String, String> multipartStreamHeadersMap = null;
 	Part.Builder currentPartBuilder = null;
 	
+	//SonarCloud asks to define a constant instead of duplicating this literal "filename" 6 times...
+	String fileNameString = "filename"; 
 	
 	public MultipartAnalyzer(String multipartBodyString, String boundaryString) {
 		//TODO : Warning, still questions about getBytes Charset...
@@ -67,7 +69,7 @@ public class MultipartAnalyzer {
 			//Get Multipart header value for : Content-Type:
 			partBuilderSetHeader("Content-Type");
 			//Get Multipart fileName AND sourceFilename, note that if file data is present a complete sourcefilename will be set later
-			partBuilderSetHeader("filename");
+			partBuilderSetHeader(fileNameString);
 
 			//Get value :
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -97,7 +99,7 @@ public class MultipartAnalyzer {
 			else if ( paramName.equalsIgnoreCase("Content-Type")) {
 				currentPartBuilder.contentType(multipartStreamHeadersMap.get(paramName));
 			}
-			else if ( paramName.equalsIgnoreCase("filename")) {
+			else if ( paramName.equalsIgnoreCase(fileNameString)) {
 				currentPartBuilder.filename(multipartStreamHeadersMap.get(paramName));
 				//note that if file data is present, a file will be re-built and a complete sourcefilename will replace this value:
 				currentPartBuilder.sourceFilename(multipartStreamHeadersMap.get(paramName));
@@ -120,11 +122,11 @@ public class MultipartAnalyzer {
 	public void partBuilderSetValue(ByteArrayOutputStream stream) throws IOException {
 
 		//fileName is present so we recreate the file in the folder of neoload project if data value is present:
-		if (multipartStreamHeadersMap.containsKey("filename")) { 
+		if (multipartStreamHeadersMap.containsKey(fileNameString)) { 
 			if (stream.size()!=0 ) { 
 				//recreate file
-				String recreatedFileName = "C:\\Users\\jerome\\Documents\\NeoLoad Projects\\" + multipartStreamHeadersMap.get("filename");
-				String recreatedFileNameRelativeToProject = System.getProperty("file.separator") + multipartStreamHeadersMap.get("filename");
+				String recreatedFileName = "C:\\Users\\jerome\\Documents\\NeoLoad Projects\\" + multipartStreamHeadersMap.get(fileNameString);
+				String recreatedFileNameRelativeToProject = System.getProperty("file.separator") + multipartStreamHeadersMap.get(fileNameString);
 				logger.info("Recreated file {}", recreatedFileName);
 				try(OutputStream outputStream = new FileOutputStream(recreatedFileName)) {
 				    stream.writeTo(outputStream);
@@ -133,7 +135,7 @@ public class MultipartAnalyzer {
 			
 			}
 			else { // stream size is null, hence file can't be re-created
-				logger.info("Missing data for {}, file can't be created", multipartStreamHeadersMap.get("filename"));
+				logger.info("Missing data for {}, file can't be created", multipartStreamHeadersMap.get(fileNameString));
 			} 
 		}
 		else { //Pas de fileName donc on copie les donnees dans PartBuilder.value

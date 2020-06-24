@@ -1,10 +1,16 @@
 package com.neotys.draft.harfileconverter; 
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*; 
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -14,266 +20,22 @@ import com.neotys.neoload.model.v3.project.Project;
 import com.neotys.neoload.model.v3.project.server.Server;
 import com.neotys.neoload.model.v3.project.userpath.Container;
 import com.neotys.neoload.model.v3.project.userpath.Header;
+import com.neotys.neoload.model.v3.project.userpath.ImmutableRequest;
 import com.neotys.neoload.model.v3.project.userpath.Request;
 import com.neotys.neoload.model.v3.project.userpath.UserPath;
 
 import de.sstoehr.harreader.HarReaderException;
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HarHeader;
+import de.sstoehr.harreader.model.HarPostData;
+import de.sstoehr.harreader.model.HarRequest;
+import de.sstoehr.harreader.model.HttpMethod;
 
 class HarFileConverterTest {
 	static final Logger logger = LoggerFactory.getLogger(HarFileConverterMain.class);
 	ClassLoader classLoader = getClass().getClassLoader();
 
-	@Test 
-	void testInvalidHARFile() {
-		//ARRANGE
-		String HARFileNameToTest = "invalidFile.har";
-		//ACT
-		File harSelectedFile = new File(classLoader.getResource(HARFileNameToTest).getFile());
-		//ASSERT
-		HarFileConverter harFileConverter = new HarFileConverter();
-		assertThrows(HarReaderException.class , () -> harFileConverter.returnProject(harSelectedFile, "test"));
-	}
 
-
-	@Test
-	void testSimpleGETFile() {
-		//ARRANGE
-		String HARFileNameToTest = "simpleGETFile.har";
-
-		Server expectedServer = Server.builder()
-				.name("jack.intranet.neotys.com")
-				.host("jack.intranet.neotys.com")
-				.port("9090")
-				.scheme(Server.Scheme.valueOf("HTTP"))
-				.build();
-
-		Request.Builder expectedRequestBuilder = Request.builder()
-				.name("/favicon.ico")
-				.url("http://jack.intranet.neotys.com:9090/favicon.ico")
-				.method("GET")
-				.server("jack.intranet.neotys.com");
-
-		expectedRequestBuilder.addHeaders(Header.builder().name("header1").value("1").build());
-		expectedRequestBuilder.addHeaders(Header.builder().name("header2").value("2").build());
-
-		//Subcontainer that contains "page_1" pageRef har object.
-		Container pageRef_1 = Container.builder().name("page_1").addSteps(expectedRequestBuilder.build()).build();
-		//Actions container that contains all pages containers
-		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef_1);
-
-		UserPath expectedUserPath = UserPath.builder()
-				.init(Container.builder().name("Init").build())
-				.actions(expectedActionsContainer.build())
-				.end(Container.builder().name("End").build())
-				.name("Demo User Path")
-				.build();
-
-		Project expectedProject = Project.builder()
-				.name("test")
-				.addUserPaths(expectedUserPath)
-				.addServers(expectedServer)
-				.build();
-
-		//ACT
-		File harSelectedFile = new File(classLoader.getResource(HARFileNameToTest).getFile());
-
-		//ASSERT
-		try {
-			HarFileConverter harFileConverter = new HarFileConverter();
-			Project ProjectUnderTest = harFileConverter.returnProject(harSelectedFile, "test");
-			assertEquals(expectedProject.getServers(),ProjectUnderTest.getServers(), "Servers are different from expected");
-			assertEquals(expectedProject.getUserPaths(),ProjectUnderTest.getUserPaths(), "UserPath is different from expected");
-			assertEquals(expectedProject,ProjectUnderTest, "Project is different from expected");
-
-
-		} catch (HarReaderException e) {
-			fail("Exception has been thrown : " + e.getMessage());
-		}
-
-	}
-
-
-	@Test
-	void testPostTextFile() {
-		//ARRANGE
-		String HARFileNameToTest = "PostTextFile.har";
-
-		Server expectedServer = Server.builder()
-				.name("api.segment.io")
-				.host("api.segment.io")
-				.port("443") //default for https
-				.scheme(Server.Scheme.valueOf("HTTPS"))
-				.build();
-
-		Request.Builder expectedRequestBuilder = Request.builder()
-				.name("/v1/p")
-				.url("https://api.segment.io/v1/p")
-				.method("POST")
-				.server("api.segment.io");
-
-		expectedRequestBuilder.addHeaders(Header.builder().name("header1").value("1").build());
-		expectedRequestBuilder.addHeaders(Header.builder().name("header2").value("2").build());
-		expectedRequestBuilder.addHeaders(Header.builder().name("Content-Type").value("text/plain").build());
-		expectedRequestBuilder.body("fake text");
-
-		//Subcontainer that contains "page_1" pageRef har object.
-		Container pageRef = Container.builder().name("page_1").addSteps(expectedRequestBuilder.build()).build();
-		//Actions container that contains all pages containers
-		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef);
-
-
-		UserPath expectedUserPath = UserPath.builder()
-				.init(Container.builder().name("Init").build())
-				.actions(expectedActionsContainer.build())
-				.end(Container.builder().name("End").build())
-				.name("Demo User Path")
-				.build();
-
-		Project expectedProject = Project.builder()
-				.name("test")
-				.addUserPaths(expectedUserPath)
-				.addServers(expectedServer)
-				.build();
-
-		//ACT
-		File harSelectedFile = new File(classLoader.getResource(HARFileNameToTest).getFile());
-
-		//ASSERT
-		try {
-			HarFileConverter harFileConverter = new HarFileConverter();
-			Project ProjectUnderTest = harFileConverter.returnProject(harSelectedFile,"test");
-			assertEquals(expectedProject.getServers(),ProjectUnderTest.getServers(), "Servers are different from expected");
-			assertEquals(expectedProject.getUserPaths(),ProjectUnderTest.getUserPaths(), "UserPath is different from expected");
-			assertEquals(expectedProject,ProjectUnderTest, "Project is different from expected");
-
-		} catch (HarReaderException e) {
-			fail("Exception has been thrown : " + e.getMessage());
-		}
-
-	}
-
-	@Test
-	void testPostFormFile() {
-		//ARRANGE
-		String HARFileNameToTest = "PostFormFile.har";
-
-		Server expectedServer = Server.builder()
-				.name("api.segment.io")
-				.host("api.segment.io")
-				.port("443") //default for https
-				.scheme(Server.Scheme.valueOf("HTTPS"))
-				.build();
-
-		Request.Builder expectedRequestBuilder = Request.builder()
-				.name("/v1/p")
-				.url("https://api.segment.io/v1/p")
-				.method("POST")
-				.server("api.segment.io");
-
-		expectedRequestBuilder.addHeaders(Header.builder().name("header1").value("1").build());
-		expectedRequestBuilder.addHeaders(Header.builder().name("header2").value("2").build());
-		expectedRequestBuilder.addHeaders(Header.builder().name("Content-Type").value("application/x-www-form-urlencoded").build());
-		expectedRequestBuilder.body("{\"requests\":[{\"indexName\":\"PROD_learning-content_FR\",\"params\":\"query=&page=0&highlightPreTag=%3Cais-highlight-0000000000%3E&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&facets=%5B%5D&tagFilters=\"}]}");
-
-		//Subcontainer that contains "page_1" pageRef har object.
-		Container pageRef_1 = Container.builder().name("page_1").addSteps(expectedRequestBuilder.build()).build();
-		//Actions container that contains all pages containers
-		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef_1);
-
-		UserPath expectedUserPath = UserPath.builder()
-				.init(Container.builder().name("Init").build())
-				.actions(expectedActionsContainer.build())
-				.end(Container.builder().name("End").build())
-				.name("Demo User Path")
-				.build();
-
-		Project expectedProject = Project.builder()
-				.name("test")
-				.addUserPaths(expectedUserPath)
-				.addServers(expectedServer)
-				.build();
-
-		//ACT
-		File harSelectedFile = new File(classLoader.getResource(HARFileNameToTest).getFile());
-
-		//ASSERT
-		try {
-			HarFileConverter harFileConverter = new HarFileConverter();
-			Project ProjectUnderTest = harFileConverter.returnProject(harSelectedFile, "test");
-			assertEquals(expectedProject.getServers(),ProjectUnderTest.getServers(), "Servers are different from expected");
-			assertEquals(expectedProject.getUserPaths(),ProjectUnderTest.getUserPaths(), "UserPath is different from expected");
-			assertEquals(expectedProject,ProjectUnderTest, "Project is different from expected");
-
-		} catch (HarReaderException e) {
-			fail("Exception has been thrown : " + e.getMessage());
-		}
-	}
-
-
-
-	/* Waiting for bug correction in ImmutableRequest equals method : Objects.equals(bodyBinary, another.bodyBinary) => Arrays.equals( bodyBinary, another.bodyBinary)
-	
-	@Test
-	void testPostRawFile() { // "https://mail.google.com/sync/u/0/i/s?hl=fr&c=9"
-		//ARRANGE
-		String HARFileNameToTest = "PostRawFile.har";
-
-		Server expectedServer = Server.builder()
-				.name("mail.google.com")
-				.host("mail.google.com")
-				.port("443") //default for https
-				.scheme(Server.Scheme.valueOf("HTTPS"))
-				.build();
-
-		Request.Builder expectedRequestBuilder = Request.builder()
-				.name("/sync/u/0/i/s")
-				.url("https://mail.google.com/sync/u/0/i/s?hl=fr&c=9")
-				.method("POST")
-				.server("mail.google.com");
-
-		expectedRequestBuilder.addHeaders(Header.builder().name(":method").value("POST").build());
-		expectedRequestBuilder.addHeaders(Header.builder().name(":authority").value("mail.google.com").build());
-		expectedRequestBuilder.addHeaders(Header.builder().name("content-type").value("application/json").build());
-		
-		String expectedbodyBinary_textFormat = "{\"2\":{\"1\":[{\"1\":\"19\",\"2\":{\"1\":\"thread-a:r-1233115413788030\",\"2\":{\"3\":{\"1\":{\"1\":\"\",\"3\":\"1591087529\",\"4\":\"thread-a:r-1233115413788030\",\"5\":[{\"1\":\"msg-a:r8149510851038\",\"2\":{\"1\":1,\"2\":\"unknown@gmail.com\",\"3\":\"John Smith\",\"10\":\"unknown@gmail.com\"},\"3\":[{\"1\":1,\"2\":\"\",\"3\":\"john\"}],\"7\":\"1591087529\",\"8\":\"\",\"9\":{\"2\":[{\"1\":0,\"2\":\"<div dir=\\\"ltr\\\"><br></div>\"}],\"7\":1},\"11\":[\"^all\",\"^r\",\"^r_bt\"],\"18\":\"1591087529\",\"36\":{\"6\":0},\"37\":{\"4\":0},\"42\":0,\"43\":{\"1\":0,\"2\":0,\"3\":0,\"4\":0},\"52\":\"s:3665a9284077db64|#msg-a:r8149510851038585|0\"}]}}}}}]},\"3\":{\"1\":1,\"2\":\"2254\",\"5\":{\"2\":0},\"7\":1},\"4\":{\"2\":1,\"3\":\"1591087529\",\"4\":0,\"5\":112},\"5\":2}";
-		expectedRequestBuilder.bodyBinary(expectedbodyBinary_textFormat.getBytes(StandardCharsets.UTF_8));
-
-		//Subcontainer that contains "page_default" since no pageRef har object in this case :
-		Container pageRef_1 = Container.builder().name("page_default").addSteps(expectedRequestBuilder.build()).build();
-		//Actions container that contains all pages containers
-		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef_1);
-
-		UserPath expectedUserPath = UserPath.builder()
-				.init(Container.builder().name("Init").build())
-				.actions(expectedActionsContainer.build())
-				.end(Container.builder().name("End").build())
-				.name("Demo User Path")
-				.build();
-
-		Project expectedProject = Project.builder()
-				.name("test_HARFileConverter_Project")
-				.addUserPaths(expectedUserPath)
-				.addServers(expectedServer)
-				.build();
-
-		//ACT
-		File harSelectedFile = new File(classLoader.getResource(HARFileNameToTest).getFile());
-
-		//ASSERT
-		try {
-			HarFileConverter harFileConverter = new HarFileConverter();
-			Project ProjectUnderTest = harFileConverter.returnProject(harSelectedFile, "test");
-			assertEquals(expectedProject.getServers(),ProjectUnderTest.getServers(), "Servers are different from expected");
-			assertEquals(expectedProject.getUserPaths(),ProjectUnderTest.getUserPaths(), "UserPath is different from expected");
-			assertEquals(expectedProject,ProjectUnderTest, "Project is different from expected");
-
-		} catch (HarReaderException e) {
-			fail("Exception has been thrown : " + e.getMessage());
-		}
-	}
-
-	*/
-	
 	//POST MULTI PART:
 	@Test
 	void testPostMultiPartFile() {
@@ -311,7 +73,7 @@ class HarFileConverterTest {
 		Container pageRef_1 = Container.builder().name("page_1").addSteps(expectedRequestBuilder.build()).build();
 		//Actions container that contains all pages containers
 		Container.Builder expectedActionsContainer = Container.builder().name("Actions").addSteps(pageRef_1);
-		
+
 		UserPath expectedUserPath = UserPath.builder()
 				.init(Container.builder().name("Init").build())
 				.actions(expectedActionsContainer.build())
@@ -342,6 +104,334 @@ class HarFileConverterTest {
 	}
 
 
+	/****************************************/
+	/* NOUVELLE VERSION DES TESTS UNITAIRES */
+	/****************************************/
+
+	@Test 
+	void testInvalidHARFile() {
+		//ARRANGE
+		String HARFileNameToTest = "invalidFile.har";
+		//ACT
+		File harSelectedFile = new File(classLoader.getResource(HARFileNameToTest).getFile());
+		//ASSERT
+		HarFileConverter harFileConverter = new HarFileConverter();
+		assertThrows(HarReaderException.class , () -> harFileConverter.returnProject(harSelectedFile, "test"));
+	}
 
 
+	@Test
+	void testMethod_CreateRequest_GET() {
+		//ARRANGE
+		//Creating harEntry (har-reader object) test object :
+		List<HarHeader> headers = new ArrayList<HarHeader>();
+		HarHeader header1 = new HarHeader(); 
+		header1.setName("header1");
+		header1.setValue("1");
+		headers.add(header1);
+		HarHeader header2 = new HarHeader();
+		header2.setName("header2");
+		header2.setValue("2");
+		headers.add(header2);
+
+		HarRequest harRequest = new HarRequest();
+		harRequest.setMethod(HttpMethod.valueOf("GET"));
+		harRequest.setUrl("http://jack.intranet.neotys.com:9090/favicon.ico");
+		harRequest.setHeaders(headers);
+
+		HarEntry harEntry = new HarEntry();
+		harEntry.setRequest(harRequest);
+
+		//Creating Expected Request (neoload object) Result:
+		Request.Builder expectedRequestBuilder = Request.builder()
+				.name("/favicon.ico")
+				.url("http://jack.intranet.neotys.com:9090/favicon.ico")
+				.method("GET")
+				.server("jack.intranet.neotys.com");
+
+		expectedRequestBuilder.addHeaders(Header.builder().name("header1").value("1").build());
+		expectedRequestBuilder.addHeaders(Header.builder().name("header2").value("2").build());
+
+		//ACT:
+		HarFileConverter harFileConverter = new HarFileConverter();
+		try {
+			Request resultRequest = harFileConverter.createRequest(harEntry);
+			//ASSERT:
+			assertEquals(resultRequest,expectedRequestBuilder.build());
+		} catch (Exception e) {
+			fail("Exception has been thrown : " + e.getMessage());
+		}
+
+	}
+
+
+
+	@Test
+	void testMethod_CreateRequest_POST_TEXT() {
+		//ARRANGE
+		//Creating harEntry (har-reader object) test object :
+		List<HarHeader> headers = new ArrayList<HarHeader>();
+		HarHeader header1 = new HarHeader(); 
+		header1.setName("Content-type");
+		header1.setValue("text/plain");
+		headers.add(header1);
+
+		HarPostData harPostData = new HarPostData();
+		harPostData.setText("fake text");
+
+		HarRequest harRequest = new HarRequest();
+		harRequest.setMethod(HttpMethod.valueOf("POST"));
+		harRequest.setUrl("https://www.example.com");
+		harRequest.setHeaders(headers);
+		harRequest.setPostData(harPostData);
+
+		HarEntry harEntry = new HarEntry();
+		harEntry.setRequest(harRequest); 
+
+		//Creating Expected Request (neoload object) Result:
+		Request.Builder expectedRequestBuilder = Request.builder()
+				.name("")
+				.url("https://www.example.com")
+				.method("POST")
+				.server("www.example.com");
+
+		expectedRequestBuilder.addHeaders(Header.builder().name("Content-type").value("text/plain").build());
+		expectedRequestBuilder.body("fake text");
+
+		//ACT:
+		HarFileConverter harFileConverter = new HarFileConverter();
+		try {
+			Request resultRequest = harFileConverter.createRequest(harEntry);
+			//ASSERT:
+			assertEquals(resultRequest,expectedRequestBuilder.build());
+		} catch (Exception e) {
+			fail("Exception has been thrown : " + e.getMessage());
+		}
+	}
+
+
+	//TODO: Writer format ? Needs url decoding before ? Waiting for Neoload response.
+	@Test
+	void testMethod_CreateRequest_POST_FORM_URLENCODED() {
+		//ARRANGE
+		//Creating harEntry (har-reader object) test object :
+		List<HarHeader> headers = new ArrayList<HarHeader>();
+		HarHeader header1 = new HarHeader(); 
+		header1.setName("Content-Type");
+		header1.setValue("application/x-www-form-urlencoded");
+		headers.add(header1);
+
+		HarPostData harPostData = new HarPostData();
+		harPostData.setText("{\"requests\":[{\"indexName\":\"PROD_learning-content_FR\",\"params\":\"query=&page=0&highlightPreTag=%3Cais-highlight-0000000000%3E&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&facets=%5B%5D&tagFilters=\"}]}");
+
+		HarRequest harRequest = new HarRequest();
+		harRequest.setMethod(HttpMethod.valueOf("POST"));
+		harRequest.setUrl("https://api.segment.io/v1/p");
+		harRequest.setHeaders(headers);
+		harRequest.setPostData(harPostData);
+
+		HarEntry harEntry = new HarEntry();
+		harEntry.setRequest(harRequest);
+
+		//Creating Expected Request (neoload object) Result:
+		Request.Builder expectedRequestBuilder = Request.builder()
+				.name("/v1/p")
+				.url("https://api.segment.io/v1/p")
+				.method("POST")
+				.server("api.segment.io");
+
+		expectedRequestBuilder.addHeaders(Header.builder().name("Content-Type").value("application/x-www-form-urlencoded").build());
+		expectedRequestBuilder.body("{\"requests\":[{\"indexName\":\"PROD_learning-content_FR\",\"params\":\"query=&page=0&highlightPreTag=%3Cais-highlight-0000000000%3E&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&facets=%5B%5D&tagFilters=\"}]}");
+
+
+		//ACT:
+		HarFileConverter harFileConverter = new HarFileConverter();
+		try {
+			Request resultRequest = harFileConverter.createRequest(harEntry);
+			//ASSERT:
+			assertEquals(resultRequest,expectedRequestBuilder.build());
+		} catch (Exception e) {
+			fail("Exception has been thrown : " + e.getMessage());
+		}
+	}
+
+
+	@Test
+	void testMethod_CreateRequest_POST_BINARY() {
+		//ARRANGE
+		//Creating harEntry (har-reader object) test object :
+		List<HarHeader> headers = new ArrayList<HarHeader>();
+		HarHeader header1 = new HarHeader(); 
+		header1.setName("content-type");
+		header1.setValue("application/json");
+		headers.add(header1);
+
+		HarPostData harPostData = new HarPostData();
+		harPostData.setText("{\"2\":{\"1\":[{\"1\":\"19\",\"2\":{\"1\":\"thread-a:r-1233115413788030\",\"2\":{\"3\":{\"1\":{\"1\":\"\",\"3\":\"1591087529\",\"4\":\"thread-a:r-1233115413788030\",\"5\":[{\"1\":\"msg-a:r8149510851038\",\"2\":{\"1\":1,\"2\":\"unknown@gmail.com\",\"3\":\"John Smith\",\"10\":\"unknown@gmail.com\"},\"3\":[{\"1\":1,\"2\":\"\",\"3\":\"john\"}],\"7\":\"1591087529\",\"8\":\"\",\"9\":{\"2\":[{\"1\":0,\"2\":\"<div dir=\\\"ltr\\\"><br></div>\"}],\"7\":1},\"11\":[\"^all\",\"^r\",\"^r_bt\"],\"18\":\"1591087529\",\"36\":{\"6\":0},\"37\":{\"4\":0},\"42\":0,\"43\":{\"1\":0,\"2\":0,\"3\":0,\"4\":0},\"52\":\"s:3665a9284077db64|#msg-a:r8149510851038585|0\"}]}}}}}]},\"3\":{\"1\":1,\"2\":\"2254\",\"5\":{\"2\":0},\"7\":1},\"4\":{\"2\":1,\"3\":\"1591087529\",\"4\":0,\"5\":112},\"5\":2}");
+
+		HarRequest harRequest = new HarRequest();
+		harRequest.setMethod(HttpMethod.valueOf("POST"));
+		harRequest.setUrl("https://mail.google.com/sync/u/0/i/s?hl=fr&c=9");
+		harRequest.setHeaders(headers);
+		harRequest.setPostData(harPostData);
+
+		HarEntry harEntry = new HarEntry();
+		harEntry.setRequest(harRequest);
+
+		//Creating Expected Request (neoload object) Result:
+		Request.Builder expectedRequestBuilder = Request.builder()
+				.name("/sync/u/0/i/s")
+				.url("https://mail.google.com/sync/u/0/i/s?hl=fr&c=9")
+				.method("POST")
+				.server("mail.google.com");
+
+		expectedRequestBuilder.addHeaders(Header.builder().name("content-type").value("application/json").build());
+
+		String expectedbodyBinary_textFormat = "{\"2\":{\"1\":[{\"1\":\"19\",\"2\":{\"1\":\"thread-a:r-1233115413788030\",\"2\":{\"3\":{\"1\":{\"1\":\"\",\"3\":\"1591087529\",\"4\":\"thread-a:r-1233115413788030\",\"5\":[{\"1\":\"msg-a:r8149510851038\",\"2\":{\"1\":1,\"2\":\"unknown@gmail.com\",\"3\":\"John Smith\",\"10\":\"unknown@gmail.com\"},\"3\":[{\"1\":1,\"2\":\"\",\"3\":\"john\"}],\"7\":\"1591087529\",\"8\":\"\",\"9\":{\"2\":[{\"1\":0,\"2\":\"<div dir=\\\"ltr\\\"><br></div>\"}],\"7\":1},\"11\":[\"^all\",\"^r\",\"^r_bt\"],\"18\":\"1591087529\",\"36\":{\"6\":0},\"37\":{\"4\":0},\"42\":0,\"43\":{\"1\":0,\"2\":0,\"3\":0,\"4\":0},\"52\":\"s:3665a9284077db64|#msg-a:r8149510851038585|0\"}]}}}}}]},\"3\":{\"1\":1,\"2\":\"2254\",\"5\":{\"2\":0},\"7\":1},\"4\":{\"2\":1,\"3\":\"1591087529\",\"4\":0,\"5\":112},\"5\":2}";
+		expectedRequestBuilder.bodyBinary(expectedbodyBinary_textFormat.getBytes(StandardCharsets.UTF_8));
+
+		//ACT:
+		HarFileConverter harFileConverter = new HarFileConverter();
+		try {
+			ImmutableRequest resultRequest = (ImmutableRequest) harFileConverter.createRequest(harEntry);
+			//ASSERT:
+			assertTrue(equalsDebugged(resultRequest,expectedRequestBuilder.build()));
+		} catch (Exception e) {
+			fail("Exception has been thrown : " + e.getMessage());
+		}
+	}	
+
+
+
+	@Test
+	void testMethod_CreateRequest_UnknownContentType() {
+		//ARRANGE
+		//Creating harEntry (har-reader object) test object :
+		List<HarHeader> headers = new ArrayList<HarHeader>();
+		HarHeader header1 = new HarHeader(); 
+		header1.setName("content-type");
+		header1.setValue("thisIsAnUnknownContentType/superUnknown");
+		headers.add(header1);
+
+		HarPostData harPostData = new HarPostData();
+		harPostData.setText("fake text");
+
+		HarRequest harRequest = new HarRequest();
+		harRequest.setMethod(HttpMethod.valueOf("POST"));
+		harRequest.setUrl("https://api.segment.io/v1/p");
+		harRequest.setHeaders(headers);
+		harRequest.setPostData(harPostData);
+
+		HarEntry harEntry = new HarEntry();
+		harEntry.setRequest(harRequest);
+
+		//Creating Expected Request (neoload object) Result:
+		Request.Builder expectedRequestBuilder = Request.builder()
+				.name("/v1/p")
+				.url("https://api.segment.io/v1/p")
+				.method("POST")
+				.server("api.segment.io");
+
+		expectedRequestBuilder.addHeaders(Header.builder().name("content-type").value("thisIsAnUnknownContentType/superUnknown").build());
+		expectedRequestBuilder.bodyBinary(new String("fake text").getBytes());
+
+
+		//ACT:
+		HarFileConverter harFileConverter = new HarFileConverter();
+		try {
+			ImmutableRequest resultRequest = (ImmutableRequest) harFileConverter.createRequest(harEntry);
+			//ASSERT:
+			assertTrue(equalsDebugged(resultRequest,expectedRequestBuilder.build()));
+		} catch (Exception e) {
+			fail("Exception has been thrown : " + e.getMessage());
+		}
+
+	}
+
+
+	@Test
+	void testMethod_CreateRequest_ContentType_NotFound() {
+		//ARRANGE
+		//Creating harEntry (har-reader object) test object :
+		List<HarHeader> headers = new ArrayList<HarHeader>();
+		HarHeader header1 = new HarHeader(); 
+		header1.setName("header1");
+		header1.setValue("1");
+		headers.add(header1);
+
+		HarPostData harPostData = new HarPostData();
+		harPostData.setText("fake text");
+
+		HarRequest harRequest = new HarRequest();
+		harRequest.setMethod(HttpMethod.valueOf("POST"));
+		harRequest.setUrl("https://api.segment.io/v1/p");
+		harRequest.setHeaders(headers);
+		harRequest.setPostData(harPostData);
+
+		HarEntry harEntry = new HarEntry();
+		harEntry.setRequest(harRequest);
+
+		//Creating Expected Request (neoload object) Result:
+		Request.Builder expectedRequestBuilder = Request.builder()
+				.name("/v1/p")
+				.url("https://api.segment.io/v1/p")
+				.method("POST")
+				.server("api.segment.io");
+
+		expectedRequestBuilder.addHeaders(Header.builder().name("header1").value("1").build());
+		expectedRequestBuilder.bodyBinary(new String("fake text").getBytes());
+
+
+		//ACT:
+		HarFileConverter harFileConverter = new HarFileConverter();
+		try {
+			ImmutableRequest resultRequest = (ImmutableRequest) harFileConverter.createRequest(harEntry);
+			//ASSERT:
+			assertTrue(equalsDebugged(resultRequest,expectedRequestBuilder.build()));
+		} catch (Exception e) {
+			fail("Exception has been thrown : " + e.getMessage());
+		}
+
+	}
+
+
+	/**
+	 * <p>This method replaces the equals method from ImmutableRequest (package com.neotys.neoload.model.v3.project.userpath) 
+	 * when bodyBinary data is present.	The ImmutableRequest method is currently wrong since {@code  Objects.equals} does
+	 *  not work as expected for binary arrays. It should be replaced by :
+	 *  {@code Arrays.equal} </p>
+	 * 
+	 */
+
+
+	private boolean equalsDebugged(ImmutableRequest req1, ImmutableRequest req2) {
+		return req1.getName().equals(req2.getName())
+				&& req1.getUrl().equals(req2.getUrl())
+				&& req1.getServer().equals(req2.getServer())
+				&& req1.getMethod().equals(req2.getMethod())
+				&& req1.getHeaders().equals(req2.getHeaders())
+				&& req1.getBody().equals(req2.getBody())
+				&& equalsForOptional( req1.getBodyBinary(), req2.getBodyBinary())
+				&& req1.getParts().equals(req2.getParts())
+				&& req1.getExtractors().equals(req1.getExtractors())
+				&& req1.getFollowRedirects().equals(req2.getFollowRedirects())
+				&& req1.getDescription().equals(req2.getDescription())
+				&& req1.getSlaProfile().equals(req2.getSlaProfile());
+	}
+
+	private boolean equalsForOptional (Optional<byte[]> obj1, Optional<byte[]> obj2 ){
+		if (obj1.isPresent() && obj2.isPresent()) {
+			return Arrays.equals( obj1.get(), obj2.get());
+		} else if (obj1.isPresent()) {
+			return false;
+		} else if (obj2.isPresent()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 }
+
+
+
+

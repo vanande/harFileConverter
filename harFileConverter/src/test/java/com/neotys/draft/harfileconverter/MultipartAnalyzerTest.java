@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import com.neotys.neoload.model.v3.project.userpath.Part;
 
-import de.sstoehr.harreader.HarReaderException;
-
 class MultipartAnalyzerTest {
 
 	/*
@@ -75,9 +73,12 @@ class MultipartAnalyzerTest {
 				+ "----99--\r\n";
 
 		String boundary = "--99";
+		
+		//ACT
+		MultipartAnalyzer multipartAnalyzer = new MultipartAnalyzer(multipartBodyString,boundary);
 	
 		// AssertThrows
-		assertThrows(IllegalStateException.class , () -> new MultipartAnalyzer(multipartBodyString,boundary).returnParts());
+		assertThrows(IllegalStateException.class , () -> multipartAnalyzer.returnParts());
 
 	}
 	
@@ -91,9 +92,13 @@ class MultipartAnalyzerTest {
 				+ "----99--\r\n";
 
 		String boundary = "--99";
-	
+		
+		//ACT
+		MultipartAnalyzer multipartAnalyzer = new MultipartAnalyzer(multipartBodyString,boundary);
+			
+		
 		// AssertThrows
-		assertThrows(NullPointerException.class , () -> new MultipartAnalyzer(multipartBodyString,boundary).returnParts());
+		assertThrows(NullPointerException.class , () -> multipartAnalyzer.returnParts());
 
 	}
 
