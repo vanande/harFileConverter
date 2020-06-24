@@ -6,7 +6,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,29 +32,30 @@ import de.sstoehr.harreader.HarReaderException;
 import de.sstoehr.harreader.model.Har;
 import de.sstoehr.harreader.model.HarEntry;
 import de.sstoehr.harreader.model.HarHeader;
- 
+
 /**
  * <p>This class converts a HTTP ARCHIVE file (.har) to a 
  * Neoload project format (.nlp). </p>
  * 
- * Use the {@code returnParts()} function to return a List< Part > at Neoload format
+ * Use the {@code writeProject()} function to write the Neoload project
  * 
  *
- */ 
+ */  
 
 public class HarFileConverter {
 
 	static final Logger logger = LoggerFactory.getLogger(HarFileConverter.class);
 
-	
-	//Neoload data:
+
+
+	//Neoload:
 	Container.Builder actionsContainer = null;
-	HashMap<String,Container.Builder> hashMapContainerBuilderForPages = new HashMap<>(); // 1 container created for each "pageref" HAR objects
+	LinkedHashMap<String,Container.Builder> hashMapContainerBuilderForPages = new LinkedHashMap<>(); // 1 container created for each "pageref" HAR objects
 	List<Server> servers = new ArrayList<>(); //To avoid server doubles, a list of known servers must be maintained
-	
+
 	//EventListener:
 	EventListenerUtilsHAR eventListenerUtilsHAR = new EventListenerUtilsHAR();
-	
+
 	//Constructors
 	public HarFileConverter(){
 		//Do nothing, constructor with no Listener
@@ -63,46 +65,52 @@ public class HarFileConverter {
 		eventListenerUtilsHAR.addEventListener(eventListener);
 	}
 
-	
+
 	/**
 	 * <p>Use this method to write the Neoload Project (.nlp) in . </p>
 	 * 
 	 */
-	
+
 	public void writeProject(File harSelectedFile, File neoloadProjectFile) {
-		
+
 		try {
 			String neoloadProjectFolder = neoloadProjectFile.getParent();
 			String neoloadProjectName = FilenameUtils.removeExtension(neoloadProjectFile.getName());
-					
+
 			NeoLoadWriter writer = new NeoLoadWriter(returnProject(harSelectedFile,neoloadProjectName),neoloadProjectFolder);
 			writer.write(true, "7.0", "7.2.2");
-			
+
 		} catch (HarReaderException e) {
 			logger.error("File conversion has failed : {} " ,  harSelectedFile.getAbsolutePath());
 			logger.error("Cause = {} " , e.getMessage());
 		}
 	}
-	
-	
+
+
 	/**
 	 * <p>Use this method to convert HAR file to Neoload Project (.nlp). </p>
 	 * 
 	 * @return Neoload Project
 	 * 
-	 */
+	 */ 
 
 	Project returnProject(File harSelectedFile, String neoloadProjectName) throws HarReaderException {
 
 		eventListenerUtilsHAR.startScript(harSelectedFile.getName());
-		
+
 		actionsContainer = Container.builder().name("Actions");
 
 		HarReader harReader = new HarReader();
 		Har har = harReader.readFromFile(harSelectedFile);
-		Stream<HarEntry> streamHarEntries = har.getLog().getEntries().stream();
 
-		streamHarEntries.forEach( currentHarEntry -> { 
+
+		Stream<HarEntry> streamHarEntries = har.getLog().getEntries().stream();
+		//need to sort the Stream because HAR entries are not written in the correct chronological order :
+		streamHarEntries.sorted(Comparator.comparing(HarEntry::getStartedDateTime))
+		.forEach( currentHarEntry -> {
+
+			//logger.info("URL: {} , time = {}" ,  currentHarEntry.getRequest().getUrl(), currentHarEntry.getStartedDateTime());
+
 			try {
 				this.buildContainer(currentHarEntry); //used for har "pageref" management
 				this.buildServer(currentHarEntry);
@@ -116,14 +124,14 @@ public class HarFileConverter {
 			}
 
 		});
-		
+
 		//Add all Containers in hashMapContainerBuilderForPages to the "root" container : actionsContainer
 		hashMapContainerBuilderForPages.entrySet().stream()
-			.map(Map.Entry::getValue)
-			.forEach(currentContainerBuilder ->
-			actionsContainer.addSteps(currentContainerBuilder.build()));
-		
-		
+		.map(Map.Entry::getValue)
+		.forEach(currentContainerBuilder ->
+		actionsContainer.addSteps(currentContainerBuilder.build()));
+
+
 		UserPath userPath = UserPath.builder()
 				.init(Container.builder().name("Init").build())
 				.actions(actionsContainer.build())
@@ -131,9 +139,9 @@ public class HarFileConverter {
 				.name("Demo User Path")
 				.build();
 
-		
+
 		eventListenerUtilsHAR.endScript();
-		
+
 		return Project.builder()
 				.name(neoloadProjectName)
 				.addUserPaths(userPath)
@@ -147,7 +155,7 @@ public class HarFileConverter {
 	 * 
 	 */
 
-	private void buildRequest(HarEntry currentHarEntry) throws IOException, ContentTypeException {
+	private void buildRequest(HarEntry currentHarEntry) throws IOException {
 
 		URL url = new URL(currentHarEntry.getRequest().getUrl());
 
@@ -175,7 +183,7 @@ public class HarFileConverter {
 				.map(HarHeader::getValue)
 				.findFirst()
 				;
-		
+
 		//Content-Type was found and PostData is not empty:
 		if (currentContentType.isPresent() && currentHarEntry.getRequest().getPostData().getText() != null) {
 
@@ -188,7 +196,7 @@ public class HarFileConverter {
 			//FORM_CONTENT:
 			else if("application".equalsIgnoreCase(mediaType.type())
 					&& mediaType.subtype().toLowerCase().contains("form-urlencoded")) { 								
-				
+
 				//Do we need URLDecoder.decode() or is it up to neoloadWriter to manage ?
 				requestBuilder.body(currentHarEntry.getRequest().getPostData().getText());
 			}
@@ -207,22 +215,35 @@ public class HarFileConverter {
 			}
 			//UNKNOWN Content-Type format :
 			else {
-				throw new ContentTypeException("Content-Type format UNKNOWN : " + currentContentType.get());
+
+				logger.warn("URL : {} " ,  currentHarEntry.getRequest().getUrl());
+				logger.warn("Content-Type format UNKNOWN : {} , Post Data will be considered as binary by default" , currentContentType.get());
+				requestBuilder.bodyBinary(currentHarEntry.getRequest().getPostData().getText().getBytes(StandardCharsets.UTF_8));
+
 			}
 		}
 		//Content-Type NOT FOUND but postData is present:
 		else if (!currentContentType.isPresent() && currentHarEntry.getRequest().getPostData().getText() != null) {
-			throw new ContentTypeException("Content-Type NOT FOUND");
+
+			logger.warn("URL : {} " ,  currentHarEntry.getRequest().getUrl());
+			logger.warn("Content-Type NOT FOUND, Post Data will be considered as binary by default");
+			requestBuilder.bodyBinary(currentHarEntry.getRequest().getPostData().getText().getBytes(StandardCharsets.UTF_8));
+
 		}
- 
-		
+
+
 		Request request = requestBuilder.build();
 
-		//Get the pageRef and feed the correspondant Container:
-		String currentPageRef =  (currentHarEntry.getPageref() != null && !currentHarEntry.getPageref().isEmpty()) ?  currentHarEntry.getPageref() : "page_default";
-		hashMapContainerBuilderForPages.get(currentPageRef).addSteps(request);
-		
-		
+		//Get the pageRef and feed the correspondant Container, if pageRef is empty String or null, we will use the "root" actionsContainer
+		if (currentHarEntry.getPageref() != null && !currentHarEntry.getPageref().isEmpty()) {
+			String currentPageRef =  currentHarEntry.getPageref();
+			hashMapContainerBuilderForPages.get(currentPageRef).addSteps(request);
+		}
+		else { //pageRef is empty String or null:
+			actionsContainer.addSteps(request);
+		}
+
+
 	}
 
 	/**
@@ -246,21 +267,22 @@ public class HarFileConverter {
 		}
 
 	}
-	
+
 	/**
 	 * <p>This method updates the HashMap of Container (Neoload) from a HarEntry Object (har-reader).
 	 * The objective is to create a Container for each object "pageref" contained in HAR file.
-	 * All entries where pageref is missing will be stored in the "page_default" Container. </p>
+	 * All entries where pageref is missing will be stored in the "root" actionsContainer. </p>
 	 * 
 	 */
 
 	private void buildContainer(HarEntry currentHarEntry) {
-		//Sets "page_default" as the pageRef if is empty String or null
-		String currentPageRef =  (currentHarEntry.getPageref() != null && !currentHarEntry.getPageref().isEmpty()) ?  currentHarEntry.getPageref() : "page_default";
+		//If pageRef is empty String or null, we will use the "root" actionsContainer
+		if (currentHarEntry.getPageref() != null && !currentHarEntry.getPageref().isEmpty()) {
+			String currentPageRef =  currentHarEntry.getPageref();
 
-		if (!hashMapContainerBuilderForPages.containsKey(currentPageRef)) {
-			hashMapContainerBuilderForPages.put(currentPageRef, Container.builder().name(currentPageRef));
-
+			if (!hashMapContainerBuilderForPages.containsKey(currentPageRef)) {
+				hashMapContainerBuilderForPages.put(currentPageRef, Container.builder().name(currentPageRef));
+			}
 		}
 
 	}
