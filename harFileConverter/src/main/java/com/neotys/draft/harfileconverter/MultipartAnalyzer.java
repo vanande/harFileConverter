@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * Use the {@code returnParts()} function to return a List< Part > at Neoload format
  * 
  *
- */  
+ */ 
 
 public class MultipartAnalyzer {
 

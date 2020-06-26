@@ -42,16 +42,9 @@ import de.sstoehr.harreader.model.HarHeader;
  *
  */ 
 
-public class HarFileConverter {
+public class HarFileConverter { 
 
 	static final Logger logger = LoggerFactory.getLogger(HarFileConverter.class);
-
-
-
-	//Neoload:
-	Container.Builder actionsContainer = null;
-	LinkedHashMap<String,Container.Builder> hashMapContainerBuilderForPages = new LinkedHashMap<>(); // 1 container created for each "pageref" HAR objects
-	List<Server> servers = new ArrayList<>(); //To avoid server doubles, a list of known servers must be maintained
 
 	//EventListener:
 	EventListenerUtilsHAR eventListenerUtilsHAR = new EventListenerUtilsHAR();
@@ -94,11 +87,14 @@ public class HarFileConverter {
 	 * 
 	 */ 
 
-	Project returnProject(File harSelectedFile, String neoloadProjectName) throws HarReaderException {
+	protected Project returnProject(File harSelectedFile, String neoloadProjectName) throws HarReaderException {
 
 		eventListenerUtilsHAR.startScript(harSelectedFile.getName());
 
-		actionsContainer = Container.builder().name("Actions");
+		//Neoload objects:
+		List<Server> servers = new ArrayList<>(); //To avoid server doubles, a list of known servers must be maintained	
+		Container.Builder actionsContainer = Container.builder().name("Actions"); //This is the "root" container for all Actions
+		LinkedHashMap<String,Container.Builder> hashMapContainerBuilderForPages = new LinkedHashMap<>(); // 1 container created for each "pageref" HAR objects, they will be subcontainer of actionsContainer
 
 		HarReader harReader = new HarReader();
 		Har har = harReader.readFromFile(harSelectedFile);
@@ -109,11 +105,10 @@ public class HarFileConverter {
 		streamHarEntries.sorted(Comparator.comparing(HarEntry::getStartedDateTime))
 		.forEach( currentHarEntry -> {
 
-			
 			try {
-				this.buildContainer(currentHarEntry); //used for har "pageref" management
-				this.buildServer(currentHarEntry);
-				this.storeRequest(currentHarEntry);
+				this.buildContainer(currentHarEntry, hashMapContainerBuilderForPages); //used for har "pageref" management
+				this.buildServer(currentHarEntry, servers);
+				this.buildRequest(currentHarEntry,actionsContainer,hashMapContainerBuilderForPages);
 				eventListenerUtilsHAR.readSupportedAction("Success conversion URL");
 
 			} catch (Exception e) {
@@ -154,7 +149,7 @@ public class HarFileConverter {
 	 * 
 	 */
 
-	Request createRequest(HarEntry currentHarEntry) throws IOException {
+	protected void buildRequest(HarEntry currentHarEntry, Container.Builder actionsContainer,LinkedHashMap<String,Container.Builder> hashMapContainerBuilderForPages) throws IOException {
 
 		URL url = new URL(currentHarEntry.getRequest().getUrl());
 
@@ -166,7 +161,7 @@ public class HarFileConverter {
 		.name(currentHarHeader.getName())
 		.value(currentHarHeader.getValue())
 		.build()  
-				);
+				); 
 
 		Request.Builder requestBuilder = Request.builder()
 				.name(url.getPath())
@@ -214,11 +209,9 @@ public class HarFileConverter {
 			}
 			//UNKNOWN Content-Type format :
 			else {
-
 				logger.warn("URL : {} " ,  currentHarEntry.getRequest().getUrl());
 				logger.warn("Content-Type format UNKNOWN : {} , Post Data will be considered as binary by default" , currentContentType.get());
 				requestBuilder.bodyBinary(currentHarEntry.getRequest().getPostData().getText().getBytes(StandardCharsets.UTF_8));
-
 			}
 		}
 		//Content-Type NOT FOUND but postData is present:
@@ -230,15 +223,8 @@ public class HarFileConverter {
 
 		}
 
-		return ( requestBuilder.build() );
+		Request request = requestBuilder.build();
 
-	}
-	
-	
-	
-	void storeRequest(HarEntry currentHarEntry) throws IOException {
-		Request request = createRequest(currentHarEntry);
-		
 		//Get the pageRef and feed the correspondant Container, if pageRef is empty String or null, we will use the "root" actionsContainer
 		if (currentHarEntry.getPageref() != null && !currentHarEntry.getPageref().isEmpty()) {
 			String currentPageRef =  currentHarEntry.getPageref();
@@ -247,16 +233,20 @@ public class HarFileConverter {
 		else { //pageRef is empty String or null => use the "root" actionsContainer:
 			actionsContainer.addSteps(request);
 		}
+
+
+
+
 	}
-	
+
 
 	/**
 	 * <p>This method updates the Server (Neoload) List from a HarEntry Object (har-reader).
 	 * Doubles are not allowed in Server List.</p>
 	 * 
-	 */
+	 */ 
 
-	private void buildServer(HarEntry currentHarEntry) throws MalformedURLException {
+	protected void buildServer(HarEntry currentHarEntry, List<Server> servers) throws MalformedURLException {
 		URL url = new URL(currentHarEntry.getRequest().getUrl());
 
 		Server server = Server.builder()
@@ -279,7 +269,7 @@ public class HarFileConverter {
 	 * 
 	 */
 
-	private void buildContainer(HarEntry currentHarEntry) {
+	protected void buildContainer(HarEntry currentHarEntry, LinkedHashMap<String,Container.Builder> hashMapContainerBuilderForPages) {
 		//If pageRef is empty String or null, we will use the "root" actionsContainer
 		if (currentHarEntry.getPageref() != null && !currentHarEntry.getPageref().isEmpty()) {
 			String currentPageRef =  currentHarEntry.getPageref();
