@@ -200,8 +200,8 @@ class HarFileConverterTest {
 
 			//ASSERT:
 			assertEquals(ResultActionsContainer.build(),ExpectedActionsContainer.build()); //contains data
-			assertTrue(ResultHashMapContainerBuilderForPages.size()==0);
-			assertTrue(ExpectedHashMapContainerBuilderForPages.size()==0);
+			assertEquals(0, ResultHashMapContainerBuilderForPages.size());
+			assertEquals(0, 0);
 
 		} catch (Exception e) {
 			fail("Exception has been thrown : " + e.getMessage());
@@ -256,8 +256,8 @@ class HarFileConverterTest {
 
 			//ASSERT:
 			assertEquals(ResultActionsContainer.build(),ExpectedActionsContainer.build()); //contains data
-			assertTrue(ResultHashMapContainerBuilderForPages.size()==0);
-			assertTrue(ExpectedHashMapContainerBuilderForPages.size()==0);
+			assertEquals(0, ResultHashMapContainerBuilderForPages.size());
+			assertEquals(0, ExpectedHashMapContainerBuilderForPages.size());
 
 		} catch (Exception e) {
 			fail("Exception has been thrown : " + e.getMessage());

@@ -1,0 +1,498 @@
+Endpoint: https://opensource-demo.orangehrmlive.com/
+Status: HTTP/2 302
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:17 GMT
+content-type: text/html; charset=UTF-8
+content-length: 0
+location: ./web/index.php/auth/login
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+x-content-type-options: nosniff
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+x-xss-protection: 1; mode=block
+X-Firefox-Spdy: h2
+
+null
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+Status: HTTP/2 200
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:17 GMT
+content-type: text/html; charset=UTF-8
+cache-control: no-cache, private
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+X-Firefox-Spdy: h2
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OrangeHRM</title>
+      <link rel="icon" href="/web/dist/favicon.ico?v=1711595107870">
+    <link href="/web/dist/css/chunk-vendors.css?v=1711595107870" rel="preload" as="style">
+    <link href="/web/dist/css/app.css?v=1711595107870" rel="preload" as="style">
+    <link href="/web/dist/js/chunk-vendors.js?v=1711595107870" rel="preload" as="script">
+    <link href="/web/dist/js/app.js?v=1711595107870" rel="preload" as="script">
+      <link href="/web/dist/css/chunk-vendors.css?v=1711595107870" rel="stylesheet"/>
+    <link href="/web/dist/css/app.css?v=1711595107870" rel="stylesheet"/>
+</head>
+<body>
+  <style>
+    :root {
+            --oxd-primary-one-color:#FF7B1D;
+            --oxd-primary-font-color:#FFFFFF;
+            --oxd-secondary-four-color:#76BC21;
+            --oxd-secondary-font-color:#FFFFFF;
+            --oxd-primary-gradient-start-color:#FF920B;
+            --oxd-primary-gradient-end-color:#F35C17;
+            --oxd-secondary-gradient-start-color:#FF920B;
+            --oxd-secondary-gradient-end-color:#F35C17;
+            --oxd-primary-one-lighten-5-color:#ff8a37;
+            --oxd-primary-one-lighten-30-color:#ffd4b6;
+            --oxd-primary-one-darken-5-color:#ff6c03;
+            --oxd-primary-one-alpha-10-color:rgba(255, 123, 29, 0.1);
+            --oxd-primary-one-alpha-15-color:rgba(255, 123, 29, 0.15);
+            --oxd-primary-one-alpha-20-color:rgba(255, 123, 29, 0.2);
+            --oxd-primary-one-alpha-50-color:rgba(255, 123, 29, 0.5);
+            --oxd-secondary-four-lighten-5-color:#84d225;
+            --oxd-secondary-four-darken-5-color:#68a61d;
+            --oxd-secondary-four-alpha-10-color:rgba(118, 188, 33, 0.1);
+            --oxd-secondary-four-alpha-15-color:rgba(118, 188, 33, 0.15);
+            --oxd-secondary-four-alpha-20-color:rgba(118, 188, 33, 0.2);
+            --oxd-secondary-four-alpha-50-color:rgba(118, 188, 33, 0.5);
+        }
+  </style>
+    <noscript>
+        <strong>
+            We're sorry but orangehrm doesn't work properly without JavaScript enabled. Please enable it to continue.
+        </strong>
+    </noscript>
+
+    <div id="app">
+    <auth-login
+            :token="&quot;c3ade05e82bcbac.TvQ9YjSJ8bK9QJKm9yZr7bIltf1GzzwHGnSaD4cnC3M.H6F6G1jWn9f-OfDJgEIgq9d6-plzmwxqVw23XdBFUzoHlk06B_yr9Og52w&quot;"
+            :login-logo-src="&quot;\/web\/images\/ohrm_logo.png&quot;"
+            :login-banner-src="&quot;\/web\/images\/ohrm_branding.png?v=1711595107870&quot;"
+            :show-social-media="true"
+            :is-demo-mode="true"
+            :authenticators="[]"
+        >
+    <template v-slot:footer>
+        <div class="orangehrm-copyright-wrapper">
+            <oxd-text tag="p" class="orangehrm-copyright">OrangeHRM OS 5.6.1</oxd-text>
+<oxd-text tag="p" class="orangehrm-copyright">&copy; 2005 - 2024 <a href="http://www.orangehrm.com" target="_blank">OrangeHRM, Inc</a>. All rights reserved.</oxd-text>
+        </div>
+    </template>
+    </auth-login>
+    </div>
+    <script type="text/javascript">
+        window.appGlobal = {
+          baseUrl: "/web/index.php",
+          publicPath: "/web",
+        };
+    </script>
+    <script src="/web/dist/js/chunk-vendors.js?v=1711595107870"></script>
+    <script src="/web/dist/js/app.js?v=1711595107870"></script>
+</body>
+</html>
+
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/core/i18n/messages
+Status: HTTP/2 304
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:19 GMT
+etag: "r2bCuSoCq/RIhAIrdHucIA2NuLVeuc+DC+DURIjsY5E="
+cache-control: no-cache, private
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+x-content-type-options: nosniff
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+x-xss-protection: 1; mode=block
+X-Firefox-Spdy: h2
+
+
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/auth/validate
+Status: HTTP/2 302
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:25 GMT
+content-type: text/html; charset=UTF-8
+set-cookie: orangehrm=8612236563be1da08b460697553e3cc9; path=/web; secure; HttpOnly; SameSite=Lax
+cache-control: no-cache, private
+location: https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+X-Firefox-Spdy: h2
+
+null
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index
+Status: HTTP/2 200
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:25 GMT
+content-type: text/html; charset=UTF-8
+cache-control: no-cache, private
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+X-Firefox-Spdy: h2
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OrangeHRM</title>
+    <link rel="icon" href="/web/dist/favicon.ico?v=1711595107870">
+  <link href="/web/dist/css/chunk-vendors.css?v=1711595107870" rel="preload" as="style">
+  <link href="/web/dist/css/app.css?v=1711595107870" rel="preload" as="style">
+  <link href="/web/dist/js/chunk-vendors.js?v=1711595107870" rel="preload" as="script">
+  <link href="/web/dist/js/app.js?v=1711595107870" rel="preload" as="script">
+    <link href="/web/dist/css/chunk-vendors.css?v=1711595107870" rel="stylesheet"/>
+  <link href="/web/dist/css/app.css?v=1711595107870" rel="stylesheet"/>
+</head>
+<body>
+  <style>
+    :root {
+            --oxd-primary-one-color:#FF7B1D;
+            --oxd-primary-font-color:#FFFFFF;
+            --oxd-secondary-four-color:#76BC21;
+            --oxd-secondary-font-color:#FFFFFF;
+            --oxd-primary-gradient-start-color:#FF920B;
+            --oxd-primary-gradient-end-color:#F35C17;
+            --oxd-secondary-gradient-start-color:#FF920B;
+            --oxd-secondary-gradient-end-color:#F35C17;
+            --oxd-primary-one-lighten-5-color:#ff8a37;
+            --oxd-primary-one-lighten-30-color:#ffd4b6;
+            --oxd-primary-one-darken-5-color:#ff6c03;
+            --oxd-primary-one-alpha-10-color:rgba(255, 123, 29, 0.1);
+            --oxd-primary-one-alpha-15-color:rgba(255, 123, 29, 0.15);
+            --oxd-primary-one-alpha-20-color:rgba(255, 123, 29, 0.2);
+            --oxd-primary-one-alpha-50-color:rgba(255, 123, 29, 0.5);
+            --oxd-secondary-four-lighten-5-color:#84d225;
+            --oxd-secondary-four-darken-5-color:#68a61d;
+            --oxd-secondary-four-alpha-10-color:rgba(118, 188, 33, 0.1);
+            --oxd-secondary-four-alpha-15-color:rgba(118, 188, 33, 0.15);
+            --oxd-secondary-four-alpha-20-color:rgba(118, 188, 33, 0.2);
+            --oxd-secondary-four-alpha-50-color:rgba(118, 188, 33, 0.5);
+        }
+  </style>
+  <noscript>
+    <strong>
+      We're sorry but orangehrm doesn't work properly without JavaScript enabled. Please enable it to continue.
+    </strong>
+  </noscript>
+
+  <div id="app">
+    <oxd-layout
+        home-url="https://www.orangehrm.com/"
+        :sidepanel-menu-items="[{&quot;id&quot;:1,&quot;name&quot;:&quot;Admin&quot;,&quot;url&quot;:&quot;\/web\/index.php\/admin\/viewAdminModule&quot;,&quot;icon&quot;:&quot;admin&quot;},{&quot;id&quot;:30,&quot;name&quot;:&quot;PIM&quot;,&quot;url&quot;:&quot;\/web\/index.php\/pim\/viewPimModule&quot;,&quot;icon&quot;:&quot;pim&quot;},{&quot;id&quot;:41,&quot;name&quot;:&quot;Leave&quot;,&quot;url&quot;:&quot;\/web\/index.php\/leave\/viewLeaveModule&quot;,&quot;icon&quot;:&quot;leave&quot;},{&quot;id&quot;:52,&quot;name&quot;:&quot;Time&quot;,&quot;url&quot;:&quot;\/web\/index.php\/time\/viewTimeModule&quot;,&quot;icon&quot;:&quot;time&quot;},{&quot;id&quot;:65,&quot;name&quot;:&quot;Recruitment&quot;,&quot;url&quot;:&quot;\/web\/index.php\/recruitment\/viewRecruitmentModule&quot;,&quot;icon&quot;:&quot;recruitment&quot;},{&quot;id&quot;:40,&quot;name&quot;:&quot;My Info&quot;,&quot;url&quot;:&quot;\/web\/index.php\/pim\/viewMyDetails&quot;,&quot;icon&quot;:&quot;myinfo&quot;},{&quot;id&quot;:83,&quot;name&quot;:&quot;Performance&quot;,&quot;url&quot;:&quot;\/web\/index.php\/performance\/viewPerformanceModule&quot;,&quot;icon&quot;:&quot;performance&quot;},{&quot;id&quot;:82,&quot;name&quot;:&quot;Dashboard&quot;,&quot;url&quot;:&quot;\/web\/index.php\/dashboard\/index&quot;,&quot;icon&quot;:&quot;dashboard&quot;,&quot;active&quot;:true},{&quot;id&quot;:93,&quot;name&quot;:&quot;Directory&quot;,&quot;url&quot;:&quot;\/web\/index.php\/directory\/viewDirectory&quot;,&quot;icon&quot;:&quot;directory&quot;},{&quot;id&quot;:96,&quot;name&quot;:&quot;Maintenance&quot;,&quot;url&quot;:&quot;\/web\/index.php\/maintenance\/viewMaintenanceModule&quot;,&quot;icon&quot;:&quot;maintenance&quot;},{&quot;id&quot;:105,&quot;name&quot;:&quot;Claim&quot;,&quot;url&quot;:&quot;\/web\/index.php\/claim\/viewClaimModule&quot;,&quot;icon&quot;:&quot;claim&quot;},{&quot;id&quot;:101,&quot;name&quot;:&quot;Buzz&quot;,&quot;url&quot;:&quot;\/web\/index.php\/buzz\/viewBuzz&quot;,&quot;icon&quot;:&quot;buzz&quot;}]"
+        :topbar-menu-items="[]"
+        :user="{&quot;firstName&quot;:&quot;Aang&quot;,&quot;lastName&quot;:&quot;Airbender&quot;,&quot;profImgSrc&quot;:&quot;\/web\/index.php\/pim\/viewPhoto\/empNumber\/7&quot;,&quot;hasPassword&quot;:true}"
+        brand-logo-src="/web/images/orange.png?v=1711595107870"
+        brand-banner-src="/web/images/orangehrm-logo.png?v=1711595107870"
+        logout-url="/web/index.php/auth/logout"
+        support-url="/web/index.php/help/support"
+        :update-password-url="&quot;/web/index.php/pim/updatePassword&quot;"
+        :permissions="{&quot;dashboard_employees_on_leave_today_config&quot;:{&quot;canRead&quot;:true,&quot;canCreate&quot;:false,&quot;canUpdate&quot;:true,&quot;canDelete&quot;:false},&quot;dashboard_leave_widget&quot;:{&quot;canRead&quot;:true,&quot;canCreate&quot;:false,&quot;canUpdate&quot;:false,&quot;canDelete&quot;:false},&quot;dashboard_location_widget&quot;:{&quot;canRead&quot;:true,&quot;canCreate&quot;:false,&quot;canUpdate&quot;:false,&quot;canDelete&quot;:false},&quot;dashboard_subunit_widget&quot;:{&quot;canRead&quot;:true,&quot;canCreate&quot;:false,&quot;canUpdate&quot;:false,&quot;canDelete&quot;:false},&quot;dashboard_time_widget&quot;:{&quot;canRead&quot;:true,&quot;canCreate&quot;:false,&quot;canUpdate&quot;:false,&quot;canDelete&quot;:false}}"
+        :breadcrumb="{&quot;moduleName&quot;:&quot;Dashboard&quot;,&quot;level&quot;:null}"
+        :date-format="{&quot;id&quot;:&quot;Y-d-m&quot;,&quot;label&quot;:&quot;yyyy-dd-mm&quot;}"
+        help-url="/web/index.php/help/help?label=dashboard_index"
+    >
+      <view-dashboard
+            >
+    </view-dashboard>
+    <template v-slot:footer><oxd-text tag="p" class="orangehrm-copyright">OrangeHRM OS 5.6.1</oxd-text>
+<oxd-text tag="p" class="orangehrm-copyright">&copy; 2005 - 2024 <a href="http://www.orangehrm.com" target="_blank">OrangeHRM, Inc</a>. All rights reserved.</oxd-text>
+<br></template>
+    </oxd-layout>
+  </div>
+  <script type="text/javascript">
+      window.appGlobal = {
+        baseUrl: "/web/index.php",
+        publicPath: "/web",
+      };
+  </script>
+  <script src="/web/dist/js/chunk-vendors.js?v=1711595107870"></script>
+  <script src="/web/dist/js/app.js?v=1711595107870"></script>
+</body>
+</html>
+
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/core/i18n/messages
+Status: HTTP/2 304
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:28 GMT
+etag: "r2bCuSoCq/RIhAIrdHucIA2NuLVeuc+DC+DURIjsY5E="
+cache-control: no-cache, private
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+x-content-type-options: nosniff
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+x-xss-protection: 1; mode=block
+X-Firefox-Spdy: h2
+
+
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/dashboard/employees/time-at-work?timezoneOffset=2&currentDate=2024-04-09&currentTime=23:45
+Status: HTTP/2 200
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:29 GMT
+content-type: application/json
+cache-control: no-cache, private
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+X-Firefox-Spdy: h2
+
+{"data":[{"workDay":{"id":"1","day":"Mon","date":"2024-04-08"},"totalTime":{"hours":0,"minutes":0}},{"workDay":{"id":"2","day":"Tue","date":"2024-04-09"},"totalTime":{"hours":0,"minutes":33}},{"workDay":{"id":"3","day":"Wed","date":"2024-04-10"},"totalTime":{"hours":0,"minutes":0}},{"workDay":{"id":"4","day":"Thu","date":"2024-04-11"},"totalTime":{"hours":0,"minutes":0}},{"workDay":{"id":"5","day":"Fri","date":"2024-04-12"},"totalTime":{"hours":0,"minutes":0}},{"workDay":{"id":"6","day":"Sat","date":"2024-04-13"},"totalTime":{"hours":0,"minutes":0}},{"workDay":{"id":"0","day":"Sun","date":"2024-04-14"},"totalTime":{"hours":0,"minutes":0}}],"meta":{"lastAction":{"state":"PUNCHED OUT","utcDate":"2024-04-09","utcTime":"21:36","userDate":"2024-04-10","userTime":"05:36","timezoneOffset":"8"},"currentDay":{"currentDate":{"date":"2024-04-09","label":"Apr 09"},"totalTime":{"hours":0,"minutes":33}},"currentWeek":{"startDate":{"date":"2024-04-08","label":"Apr 08"},"endDate":{"date":"2024-04-14","label":"Apr 14"},"totalTime":{"hours":0,"minutes":33}},"currentUser":{"empNumber":7,"firstName":"Aang","middleName":"Last","lastName":"Airbender","terminationId":null}},"rels":[]}
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/dashboard/employees/action-summary
+Status: HTTP/2 200
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:29 GMT
+content-type: application/json
+cache-control: no-cache, private
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+X-Firefox-Spdy: h2
+
+{"data":[{"id":4,"group":"Pending Self Reviews","pendingActionCount":1},{"id":5,"group":"Candidates To Interview","pendingActionCount":1}],"meta":[],"rels":[]}
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/dashboard/shortcuts
+Status: HTTP/2 200
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:29 GMT
+content-type: application/json
+cache-control: no-cache, private
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+X-Firefox-Spdy: h2
+
+{"data":{"leave.assign_leave":true,"leave.leave_list":true,"leave.apply_leave":true,"leave.my_leave":true,"time.employee_timesheet":true,"time.my_timesheet":true},"meta":[],"rels":[]}
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/buzz/feed?limit=5&offset=0&sortOrder=DESC&sortField=share.createdAtUtc
+Status: HTTP/2 200
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:29 GMT
+content-type: application/json
+cache-control: no-cache, private
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+X-Firefox-Spdy: h2
+
+{"data":[{"id":10,"post":{"id":9},"type":"text","liked":false,"text":"Hi All;\r\n\r\nLinda has been blessed with a baby boy!\r\n\r\n\r\n\r\nLinda: With love, we welcome your dear new baby to this world. Congratulations!","employee":{"empNumber":7,"lastName":"Airbender","firstName":"Aang","middleName":"Last","employeeId":"muser","terminationId":null},"stats":{"numOfLikes":0,"numOfComments":0,"numOfShares":0},"createdDate":"2020-10-08","createdTime":"03:38","originalPost":null,"permission":{"canUpdate":true,"canDelete":true}},{"id":9,"post":{"id":8},"type":"text","liked":true,"text":"World Championship: What makes the perfect snooker player?\r\n\r\nMark Selby: Robertson has one of the best techniques in the game. It is very, very straight and he fully commits to every single shot he plays.\r\n\r\nJohn Higgins: Every shot is repetitive. He always keeps the same technique and cues through the ball bang straight.\r\n\r\nBarry Hawkins: Robertson is textbook with his grip and has a ramrod solid cue action, delivering it in a straight line.\r\n\r\nHonourable mentions: Shaun Murphy, Ding Junhui, Jack Lisowski.","employee":{"empNumber":22,"lastName":"Shaheen","firstName":"Sania","middleName":"","employeeId":"0087","terminationId":null},"stats":{"numOfLikes":1,"numOfComments":0,"numOfShares":0},"createdDate":"2020-10-08","createdTime":"03:38","originalPost":null,"permission":{"canUpdate":false,"canDelete":true}},{"id":7,"post":{"id":6},"type":"photo","liked":false,"text":" Throwback Thursdays!! ","employee":{"empNumber":11,"lastName":"Harmony","firstName":"Rebecca","middleName":"","employeeId":"0042","terminationId":null},"stats":{"numOfLikes":0,"numOfComments":0,"numOfShares":0},"createdDate":"2020-10-08","createdTime":"03:34","originalPost":null,"permission":{"canUpdate":false,"canDelete":true},"photoIds":[9]},{"id":6,"post":{"id":5},"type":"text","liked":false,"text":"Live SIMPLY\r\nDream BIG\r\nBe GREATFULL\r\nGive LOVE\r\nLaugh LOT.......","employee":{"empNumber":9,"lastName":"Hamilton","firstName":"Russel","middleName":"","employeeId":"0034","terminationId":null},"stats":{"numOfLikes":2,"numOfComments":0,"numOfShares":0},"createdDate":"2020-10-08","createdTime":"03:33","originalPost":null,"permission":{"canUpdate":false,"canDelete":true}}],"meta":{"total":4},"rels":[]}
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/dashboard/employees/leaves?date=2024-04-09
+Status: HTTP/2 503
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:28 GMT
+content-type: text/html
+content-length: 190
+X-Firefox-Spdy: h2
+
+<html>
+<head><title>503 Service Temporarily Unavailable</title></head>
+<body>
+<center><h1>503 Service Temporarily Unavailable</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/dashboard/employees/subunit
+Status: HTTP/2 503
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:28 GMT
+content-type: text/html
+content-length: 190
+X-Firefox-Spdy: h2
+
+<html>
+<head><title>503 Service Temporarily Unavailable</title></head>
+<body>
+<center><h1>503 Service Temporarily Unavailable</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/dashboard/employees/locations
+Status: HTTP/2 503
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:28 GMT
+content-type: text/html
+content-length: 190
+X-Firefox-Spdy: h2
+
+<html>
+<head><title>503 Service Temporarily Unavailable</title></head>
+<body>
+<center><h1>503 Service Temporarily Unavailable</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/events/push
+Status: HTTP/2 503
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:28 GMT
+content-type: text/html
+content-length: 190
+X-Firefox-Spdy: h2
+
+<html>
+<head><title>503 Service Temporarily Unavailable</title></head>
+<body>
+<center><h1>503 Service Temporarily Unavailable</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/auth/logout
+Status: HTTP/2 302
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:32 GMT
+content-type: text/html; charset=UTF-8
+set-cookie: orangehrm=4348d2ff4d2368237f9ccd110ecac17c; path=/web; secure; HttpOnly; SameSite=Lax
+cache-control: no-cache, private
+location: https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+X-Firefox-Spdy: h2
+
+null
+------------------------------------------------------------
+Endpoint: https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+Status: HTTP/2 200
+Headers:
+server: nginx
+date: Tue, 09 Apr 2024 21:45:32 GMT
+content-type: text/html; charset=UTF-8
+cache-control: no-cache, private
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+strict-transport-security: max-age=63072000; includeSubdomains;
+content-security-policy: default-src blob: 'self' *.projects-abroad.net fonts.googleapis.com www.google.com fonts.gstatic.com code.jquery.com maxcdn.bootstrapcdn.com ajax.googleapis.com cdnjs.cloudflare.com native.testing.equest.com www.youtube.com demo.docusign.net youtu.be player.vimeo.com docs.google.com 'unsafe-inline' 'unsafe-eval' data: font;frame-src 'self' *.amazonaws.com native.testing.equest.com sandbox.e-signlive.com;connect-src 'self' *.orangehrm.com;img-src * 'self' data: blob:
+public-key-pins: pin-sha256="blgmjf3Tb3C0sUqb7jo4axiZAnr327fX0ycrUGqjw2k=";pin-sha256="yQhO6YqQX5Y/NxyHAjXnI3jOtYWUm/TtRr666RunXRg="; pin-sha256="puCdyuZdXoDc5jSdcGKU6mdjd0VNq16yoaO2BcDF36A="; max-age=63072000; includeSubDomains
+X-Firefox-Spdy: h2
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OrangeHRM</title>
+      <link rel="icon" href="/web/dist/favicon.ico?v=1711595107870">
+    <link href="/web/dist/css/chunk-vendors.css?v=1711595107870" rel="preload" as="style">
+    <link href="/web/dist/css/app.css?v=1711595107870" rel="preload" as="style">
+    <link href="/web/dist/js/chunk-vendors.js?v=1711595107870" rel="preload" as="script">
+    <link href="/web/dist/js/app.js?v=1711595107870" rel="preload" as="script">
+      <link href="/web/dist/css/chunk-vendors.css?v=1711595107870" rel="stylesheet"/>
+    <link href="/web/dist/css/app.css?v=1711595107870" rel="stylesheet"/>
+</head>
+<body>
+  <style>
+    :root {
+            --oxd-primary-one-color:#FF7B1D;
+            --oxd-primary-font-color:#FFFFFF;
+            --oxd-secondary-four-color:#76BC21;
+            --oxd-secondary-font-color:#FFFFFF;
+            --oxd-primary-gradient-start-color:#FF920B;
+            --oxd-primary-gradient-end-color:#F35C17;
+            --oxd-secondary-gradient-start-color:#FF920B;
+            --oxd-secondary-gradient-end-color:#F35C17;
+            --oxd-primary-one-lighten-5-color:#ff8a37;
+            --oxd-primary-one-lighten-30-color:#ffd4b6;
+            --oxd-primary-one-darken-5-color:#ff6c03;
+            --oxd-primary-one-alpha-10-color:rgba(255, 123, 29, 0.1);
+            --oxd-primary-one-alpha-15-color:rgba(255, 123, 29, 0.15);
+            --oxd-primary-one-alpha-20-color:rgba(255, 123, 29, 0.2);
+            --oxd-primary-one-alpha-50-color:rgba(255, 123, 29, 0.5);
+            --oxd-secondary-four-lighten-5-color:#84d225;
+            --oxd-secondary-four-darken-5-color:#68a61d;
+            --oxd-secondary-four-alpha-10-color:rgba(118, 188, 33, 0.1);
+            --oxd-secondary-four-alpha-15-color:rgba(118, 188, 33, 0.15);
+            --oxd-secondary-four-alpha-20-color:rgba(118, 188, 33, 0.2);
+            --oxd-secondary-four-alpha-50-color:rgba(118, 188, 33, 0.5);
+        }
+  </style>
+    <noscript>
+        <strong>
+            We're sorry but orangehrm doesn't work properly without JavaScript enabled. Please enable it to continue.
+        </strong>
+    </noscript>
+
+    <div id="app">
+    <auth-login
+            :token="&quot;a.4Coxgs7Lkm6mmvL8D9VbVfKath5tXlM7XGNlJ78DKaY.0Vp48Puxwh3_1pSvXaUEN63LzkccbSNQGTsHUet3BOywc0PHtP-lL9_Yxg&quot;"
+            :login-logo-src="&quot;\/web\/images\/ohrm_logo.png&quot;"
+            :login-banner-src="&quot;\/web\/images\/ohrm_branding.png?v=1711595107870&quot;"
+            :show-social-media="true"
+            :is-demo-mode="true"
+            :authenticators="[]"
+        >
+    <template v-slot:footer>
+        <div class="orangehrm-copyright-wrapper">
+            <oxd-text tag="p" class="orangehrm-copyright">OrangeHRM OS 5.6.1</oxd-text>
+<oxd-text tag="p" class="orangehrm-copyright">&copy; 2005 - 2024 <a href="http://www.orangehrm.com" target="_blank">OrangeHRM, Inc</a>. All rights reserved.</oxd-text>
+        </div>
+    </template>
+    </auth-login>
+    </div>
+    <script type="text/javascript">
+        window.appGlobal = {
+          baseUrl: "/web/index.php",
+          publicPath: "/web",
+        };
+    </script>
+    <script src="/web/dist/js/chunk-vendors.js?v=1711595107870"></script>
+    <script src="/web/dist/js/app.js?v=1711595107870"></script>
+</body>
+</html>
+
+------------------------------------------------------------

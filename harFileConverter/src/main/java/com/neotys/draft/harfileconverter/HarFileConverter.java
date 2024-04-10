@@ -42,7 +42,7 @@ import de.sstoehr.harreader.model.HarHeader;
  *
  */ 
 
-public class HarFileConverter { 
+public class HarFileConverter {
 
 	static final Logger logger = LoggerFactory.getLogger(HarFileConverter.class);
 
@@ -71,7 +71,9 @@ public class HarFileConverter {
 			String neoloadProjectName = FilenameUtils.removeExtension(neoloadProjectFile.getName());
 
 			NeoLoadWriter writer = new NeoLoadWriter(returnProject(harSelectedFile,neoloadProjectName),neoloadProjectFolder);
+			System.out.println("Here is the NeoLoadWriter : "+  writer.getNlProjectFolder());
 			writer.write(true, "7.0", "7.2.2");
+			logger.info("NeoLoad Project saved.");
 
 		} catch (Exception e) {
 			logger.error("File conversion has failed : {} " ,  harSelectedFile.getAbsolutePath());
@@ -85,10 +87,16 @@ public class HarFileConverter {
 	 * 
 	 * @return Neoload Project
 	 * 
-	 */ 
+	 */
+
+	public static String extractShortenedPath(String url) {
+		int thirdSlashIndex = url.indexOf('/', url.indexOf('/', url.indexOf('/') + 1) + 1);
+		return thirdSlashIndex == -1 || thirdSlashIndex == url.length() - 1 ? url : url.substring(thirdSlashIndex + 1);
+	}
+
 
 	protected Project returnProject(File harSelectedFile, String neoloadProjectName) throws HarReaderException {
-
+		logger.info("Starting processing of HAR file: {}", harSelectedFile.getName());
 		eventListenerUtilsHAR.startScript(harSelectedFile.getName());
 
 		//Neoload objects:
@@ -101,6 +109,10 @@ public class HarFileConverter {
 
 
 		Stream<HarEntry> streamHarEntries = har.getLog().getEntries().stream();
+		Stream<HarEntry> streamHarEntriesSave = har.getLog().getEntries().stream();
+		FileWriterHar.writeHarEntriesToFile(streamHarEntries, "output.txt");
+
+		streamHarEntries = streamHarEntriesSave;
 		//need to sort the Stream because HAR entries are not written in the correct chronological order :
 		streamHarEntries.sorted(Comparator.comparing(HarEntry::getStartedDateTime))
 		.forEach( currentHarEntry -> {
@@ -133,8 +145,8 @@ public class HarFileConverter {
 				.name("Demo User Path")
 				.build();
 
-
 		eventListenerUtilsHAR.endScript();
+		logger.info("End processing HAR File.");
 
 		return Project.builder()
 				.name(neoloadProjectName)
@@ -234,6 +246,7 @@ public class HarFileConverter {
 			actionsContainer.addSteps(request);
 		}
 
+		logger.debug("Request built for URL: {}", currentHarEntry.getRequest().getUrl());
 
 
 

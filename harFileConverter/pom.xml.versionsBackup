@@ -21,32 +21,23 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>5.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>5.2.0</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.neotys.neoload</groupId>
 			<artifactId>neoload-project</artifactId>
-			<version>3.3.3</version>
+			<version>3.2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.neotys.neoload</groupId>
 			<artifactId>neoload-writer</artifactId>
-			<version>3.3.3</version>
+			<version>3.2.5</version>
 		</dependency>
+
+
 
 		<!-- https://mvnrepository.com/artifact/com.neotys.neoload/common-reader -->
 		<dependency>
 			<groupId>com.neotys.neoload</groupId>
 			<artifactId>common-reader</artifactId>
-			<version>3.3.3</version>
+			<version>3.2.5</version>
 			<exclusions>
 				<exclusion>
 					<groupId>ch.qos.logback</groupId>
@@ -59,33 +50,33 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.1.0-alpha1</version>
+			<version>1.7.30</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>2.1.0-alpha1</version>
+			<version>1.7.30</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/de.sstoehr/har-reader -->
 		<dependency>
 			<groupId>de.sstoehr</groupId>
 			<artifactId>har-reader</artifactId>
-			<version>2.3.0</version>
+			<version>2.1.7</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
 		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
-			<version>1.5</version>
+			<version>1.4</version>
 		</dependency>
 
 		<!-- Déclaration de la dépendance vers JUnit -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<version>5.10.2</version>
+			<version>5.5.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
