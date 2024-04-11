@@ -105,9 +105,10 @@ public class HarFileConverter {
 
 		Stream<HarEntry> streamHarEntries = har.getLog().getEntries().stream();
 
-		ExcelWriter excelWriter = new ExcelWriter("har_data.xlsx");
+
+		ExcelWriter excelWriter = new ExcelWriter("recorded_response.xlsx");
 		excelWriter.writeData(har.getLog().getEntries().stream());
-		excelWriter.save("har_data.xlsx");
+		excelWriter.save("recorded_response.xlsx");
 		///FileWriterHar.writeHarEntriesToFile(streamHarEntries, "output.txt");
 
 		//need to sort the Stream because HAR entries are not written in the correct chronological order :
@@ -150,7 +151,6 @@ public class HarFileConverter {
 				.addUserPaths(userPath)
 				.addServers(servers.toArray(new Server[0]))
 				.build();
-
 	}
 
 	/**

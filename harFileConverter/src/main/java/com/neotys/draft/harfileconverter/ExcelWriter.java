@@ -29,9 +29,15 @@ public class ExcelWriter {
 		AtomicInteger rowNum = new AtomicInteger();
 		streamHarEntries.forEach(entry -> {
 			row = sheet.createRow(rowNum.getAndIncrement());
-			writeEndpoint(entry.getRequest().getUrl(), 0);
-			writeResponseDetails(entry, 1);
+			writeTimestamp(String.valueOf(entry.getStartedDateTime().getTime()), 0);
+			writeEndpoint(entry.getRequest().getUrl(), 1);
+			writeResponseDetails(entry, 2);
 		});
+	}
+
+	private void writeTimestamp(String url, int column) {
+		cell = row.createCell(column);
+		cell.setCellValue(extractShortenedPath(url));
 	}
 
 	private void writeEndpoint(String url, int column) {
@@ -42,11 +48,13 @@ public class ExcelWriter {
 	private void writeResponseDetails(HarEntry entry, int column) {
 		cell = row.createCell(column);
 		StringBuilder responseDetails = new StringBuilder();
-		responseDetails.append(entry.getResponse().getHttpVersion()).append(".0 ").append(entry.getResponse().getStatus()).append("\n");
+		//System.out.println(entry.getStartedDateTime().toString());
+
+		responseDetails.append(entry.getResponse().getHttpVersion()).append(".0 ").append(entry.getResponse().getStatus()).append("\n"); // @TODO : remove raw fix
 		if (entry.getResponse().getHeaders() != null) {
 			responseDetails.append("\n");
 			Set<String> headersToRemove = new HashSet<>();
-			headersToRemove.add("X-Firefox-Spdy: h2"); // headers to remove here
+			headersToRemove.add("X-Firefox-Spdy: h2"); // @TODO : headers to remove here
 			entry.getResponse().getHeaders().forEach(header -> {
 				String headerString = header.getName() + ": " + header.getValue();
 				if (!headersToRemove.contains(headerString)) {

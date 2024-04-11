@@ -45,7 +45,7 @@ public class HarFileConverterMain implements EventListener {
 			File harSelectedFile = fileChooser.getSelectedFile();
 			
 			HarFileConverter harFileConverter = new HarFileConverter ( harFileConverterMain ); //constructor with EventListener
-			harFileConverter.writeProject(harSelectedFile, new File("C:\\Users\\v.khatchatrian\\Documents\\NeoLoad Projects\\NLM\\" + "NLP.nlp"));
+			harFileConverter.writeProject(harSelectedFile, new File("C:\\Users\\v.khatchatrian\\Documents\\NeoLoad Projects\\NLM\\" + "NLP.nlp")); // @TODO : replace absolute
 			
 		}
 	}

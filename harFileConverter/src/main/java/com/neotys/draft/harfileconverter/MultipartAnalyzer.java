@@ -125,7 +125,7 @@ public class MultipartAnalyzer {
 		if (multipartStreamHeadersMap.containsKey(fileNameString)) { 
 			if (stream.size()!=0 ) { 
 				//recreate file
-				String recreatedFileName = "C:\\Users\\v.khatchatrian\\Documents\\NeoLoad Projects\\" + multipartStreamHeadersMap.get(fileNameString);
+				String recreatedFileName = "C:\\Users\\v.khatchatrian\\Documents\\NeoLoad Projects\\" + multipartStreamHeadersMap.get(fileNameString); // @TODO : replace absolute
 				String recreatedFileNameRelativeToProject = System.getProperty("file.separator") + multipartStreamHeadersMap.get(fileNameString);
 				logger.info("Recreated file {}", recreatedFileName);
 				try(OutputStream outputStream = new FileOutputStream(recreatedFileName)) {
