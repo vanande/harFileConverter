@@ -89,13 +89,8 @@ public class HarFileConverter {
 	 * 
 	 */
 
-	public static String extractShortenedPath(String url) {
-		int thirdSlashIndex = url.indexOf('/', url.indexOf('/', url.indexOf('/') + 1) + 1);
-		return thirdSlashIndex == -1 || thirdSlashIndex == url.length() - 1 ? url : url.substring(thirdSlashIndex + 1);
-	}
 
-
-	protected Project returnProject(File harSelectedFile, String neoloadProjectName) throws HarReaderException {
+	protected Project returnProject(File harSelectedFile, String neoloadProjectName) throws HarReaderException, IOException {
 		logger.info("Starting processing of HAR file: {}", harSelectedFile.getName());
 		eventListenerUtilsHAR.startScript(harSelectedFile.getName());
 
@@ -109,10 +104,12 @@ public class HarFileConverter {
 
 
 		Stream<HarEntry> streamHarEntries = har.getLog().getEntries().stream();
-		Stream<HarEntry> streamHarEntriesSave = har.getLog().getEntries().stream();
-		FileWriterHar.writeHarEntriesToFile(streamHarEntries, "output.txt");
 
-		streamHarEntries = streamHarEntriesSave;
+		ExcelWriter excelWriter = new ExcelWriter("har_data.xlsx");
+		excelWriter.writeData(har.getLog().getEntries().stream());
+		excelWriter.save("har_data.xlsx");
+		///FileWriterHar.writeHarEntriesToFile(streamHarEntries, "output.txt");
+
 		//need to sort the Stream because HAR entries are not written in the correct chronological order :
 		streamHarEntries.sorted(Comparator.comparing(HarEntry::getStartedDateTime))
 		.forEach( currentHarEntry -> {
