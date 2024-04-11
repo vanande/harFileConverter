@@ -21,9 +21,9 @@ public class FileWriterHar {
 		try {
 			if (entry.getResponse() != null) {
 				writer.write("Endpoint: " + extractShortenedPath(entry.getRequest().getUrl()) + "\n");
-				writer.write("Status: " + entry.getResponse().getHttpVersion() + " " + entry.getResponse().getStatus() + "\n");
+				writer.write("Response status: " + entry.getResponse().getHttpVersion() + " " + entry.getResponse().getStatus() + "\n");
 				if (entry.getResponse().getHeaders() != null) {
-					writer.write("Headers:\n");
+					writer.write("Response headers:\n");
 					entry.getResponse().getHeaders().forEach(header -> {
 						try {
 							writer.write(header.getName() + ": " + header.getValue() + "\n");
@@ -36,6 +36,7 @@ public class FileWriterHar {
 				}
 
 				writer.write("\n");
+				writer.write("Response body : \n");
 
 				if (entry.getResponse().getContent() != null) {
 					writer.write(entry.getResponse().getContent().getText() + "\n");
@@ -57,8 +58,8 @@ public class FileWriterHar {
 		}
 	}
 
-	private static String extractShortenedPath(String url) {
-		// Implementation of extractShortenedPath method
-		return url; // Dummy implementation, replace with your logic
+	public static String extractShortenedPath(String url) {
+		int thirdSlashIndex = url.indexOf('/', url.indexOf('/', url.indexOf('/') + 1) + 1);
+		return thirdSlashIndex == -1 || thirdSlashIndex == url.length() - 1 ? url : url.substring(thirdSlashIndex + 1);
 	}
 }
