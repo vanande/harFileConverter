@@ -1,3 +1,7 @@
+# harFileConverter
+
+This project allow NeoLoad user to generate NeoLoad project from a har file.
+
 # Usage
 
 - Generate a Har file
